@@ -1,0 +1,37 @@
+{% extends "view.template.html" %}
+
+{% block nav %}
+		<div id="left_nav" class="active_nav">
+			<a href="{{url_for('clients')}}">Clients</a>
+		</div>
+		<div id="mid_nav" class="inactive_nav">
+			<a href="{{url_for('active_jobs')}}">Jobs</a>
+		</div>
+		<div id="right_nav" class="inactive_nav">
+			<a href="{{url_for('invoices')}}">Invoices</a>
+		</div>
+
+{% endblock %}
+
+{% block content %}
+
+<table>
+	<tr><th>ID</th><th>Name</th><th>Address</th></tr>
+	{% for client in clients %}
+	<tr><td><a href="{{url_for('active_jobs_for_client', ClientID=client.id)}}">{{client.id}}</a></td><td>{{client.name}}</td><td>{{client.address|safe}}</td></tr>
+	{% endfor %}
+</table>
+
+<div>
+<p>Add new client:</p>
+<form action="{{url_for('add_new_client')}}" method=post>
+<label for="id">ID (two-letter uppercase):</label><input type="text" id="id" name="id"/><br/>
+<label for="name">Name:</label><input type="text" id="name" name="name"/><br/>
+<label for="email">Email:</label><input type="text" id="email" name="email"/><br/>
+<label for="address">Address:</label><br><textarea cols="60" rows="5" id="address" name="address"></textarea><br/>
+<input type="submit" value="Add"/>
+</form>
+</div>
+
+{% endblock %}
+

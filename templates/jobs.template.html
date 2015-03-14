@@ -1,0 +1,56 @@
+{% extends "view.template.html" %}
+
+{%- from 'forms.html' import render_new_job_form, render_new_oneoff_form with context %}
+{%- from 'tables.html' import render_jobs_table, render_oneoffs_table, render_invoices_list with context %}
+
+{% block nav %}
+		<div id="left_nav" class="inactive_nav">
+			<a href="{{url_for('clients')}}">Clients</a>
+		</div>
+		<div id="mid_nav" class="active_nav">
+			<a href="{{url_for('active_jobs')}}">Jobs</a>
+		</div>
+        <div id="right_nav" class="inactive_nav">
+            <a href="{{url_for('invoices')}}">Invoices</a>
+        </div>
+{% endblock %}
+
+{% block content %}
+
+<h1>
+
+{{job_info.title}}
+
+</h1>
+
+{% if job_info.jobs|length > 0 %}
+    {{ render_jobs_table(job_info) }}
+{% endif %}
+
+{% if job_info.active_only %}
+	{% if job_info.client %}
+		<a href="{{url_for('all_jobs_for_client',ClientID=job_info.client.id)}}">Show all jobs for {{ job_info.client.name }}</a>
+	{% else %}
+		<a href="{{url_for('all_jobs')}}">Show all jobs</a>
+	{% endif %}
+{% else %}
+	{% if job_info.client %}
+		<a href="{{url_for('active_jobs_for_client',ClientID=job_info.client.id)}}">Hide inactive jobs</a>
+	{% else %}
+		<a href="{{url_for('active_jobs')}}">Hide inactive jobs</a>
+	{% endif %}
+{% endif %}
+
+{% if job_info.oneoffs is not none %}
+    {{ render_oneoffs_table(job_info) }}
+{% endif %}
+
+{% if invoices is defined %}
+    {{ render_invoices_list(invoices) }}
+{% endif %}
+
+{{ render_new_job_form(get_all_clients(), job_info) }}
+{{ render_new_oneoff_form(get_all_clients(), job_info) }}
+
+{% endblock %}
+

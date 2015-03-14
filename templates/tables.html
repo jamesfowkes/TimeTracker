@@ -1,0 +1,74 @@
+{% macro render_oneoffs_table(job_info) -%}
+    <h1>
+    One-off jobs
+    {% if job_info.client is not none %}
+        for {{ job_info.client.name }}
+    {% endif %}
+    </h1>
+    {% if job_info.oneoffs|length > 0 %}
+        <table>
+            <tr><th>Name</th><th>Date</th><th>Rate</th><th>Hours</th><th>Total</th></tr>
+            {% for oneoff in job_info.oneoffs %}
+                <tr><td>{{oneoff.Name}}</td><td>{{oneoff.format_date()}}</td><td>{{oneoff.charge()}}</td><td>{{oneoff.hours()}}</td>
+                <td>{{oneoff.get_total_str()}}
+                    <a href="{{url_for(
+                    'get_oneoff_invoice',
+                    ClientID=job_info.client.id,
+                    date=oneoff.format_date("%d"),
+                    month=oneoff.format_date("%b"),
+                    year=oneoff.format_date("%y"),
+                    name=oneoff.Name,
+                    num=oneoff.NumericID)}}">
+                    <img class="align_bottom" src="{{url_for('static', filename='invoice.png')}}"/>
+                    </a></td></tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+{% endmacro %}
+
+{% macro render_jobs_table(job_info) -%}
+    <table>
+        <tr><th>Job Name</th><th>Default Rate</th></tr>
+
+            {% for job in job_info.jobs %}
+                <tr>
+                    <td>
+                        <a href="{{url_for('job', job_name=job.name)}}">{{job.name}}</a>
+                        {% if job.active %}
+                        <a href="{{url_for('deactivate_job', job_name=job.name)}}">
+                            <img class="align_bottom" src="{{url_for('static', filename='deactivate.png')}}"
+                        </a>
+                        {% else %}
+                        <a href="{{url_for('activate_job', job_name=job.name)}}">
+                            <img class="align_bottom" src="{{url_for('static', filename='activate.png')}}"
+                        </a>
+                        {% endif %}
+                    </td>
+                <td>{{job.default_rate()}}</td>
+                </tr>
+            {% endfor %}
+    </table>
+{% endmacro %}
+
+{% macro render_invoices_list(invoices) -%}
+    {% if invoices|length > 0 %}
+        <div id="invoices">
+        <h1>
+        Invoices
+        </h1>
+        <ol>
+        {% for invoice in invoices %}
+            <li>
+                <a href="
+                    {{url_for('get_invoice_as_html', ClientID=job_info.client.id, year=invoice.date().year, month=invoice.date().month)}}">
+                        {{invoice.format("%B %Y")}}
+                </a>
+                <a href="{{url_for('get_invoice_as_pdf', ClientID=job_info.client.id, year=invoice.date().year, month=invoice.format("%m"))}}">
+                    <img class="align_bottom" src="{{url_for('static', filename='pdf.png')}}"/>
+                </a>
+            </li>
+        {% endfor %}
+        </ol>
+        </div>
+    {% endif %}
+{% endmacro %}
