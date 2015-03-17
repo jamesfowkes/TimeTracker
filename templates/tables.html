@@ -13,7 +13,7 @@
                 <td>{{oneoff.get_total_str()}}
                     <a href="{{url_for(
                     'get_oneoff_invoice',
-                    ClientID=job_info.client.id,
+                    ClientID=job_info.client.ClientID,
                     date=oneoff.format_date("%d"),
                     month=oneoff.format_date("%b"),
                     year=oneoff.format_date("%y"),
@@ -60,10 +60,10 @@
         {% for invoice in invoices %}
             <li>
                 <a href="
-                    {{url_for('get_invoice_as_html', ClientID=job_info.client.id, year=invoice.date().year, month=invoice.date().month)}}">
+                    {{url_for('get_invoice_as_html', ClientID=job_info.client.ClientID, year=invoice.date().year, month=invoice.date().month)}}">
                         {{invoice.format("%B %Y")}}
                 </a>
-                <a href="{{url_for('get_invoice_as_pdf', ClientID=job_info.client.id, year=invoice.date().year, month=invoice.format("%m"))}}">
+                <a href="{{url_for('get_invoice_as_pdf', ClientID=job_info.client.ClientID, year=invoice.date().year, month=invoice.format("%m"))}}">
                     <img class="align_bottom" src="{{url_for('static', filename='pdf.png')}}"/>
                 </a>
             </li>

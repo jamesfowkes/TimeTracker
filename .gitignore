@@ -57,3 +57,13 @@ target/
 *.css~
 *.html~
 
+# Images
+signature.jpg
+
+# IDE project files
+*.sublime-project
+*.sublime-workspace
+
+#jQuery
+jquery.js
+

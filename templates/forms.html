@@ -7,8 +7,8 @@
         <label for="ClientID">Client:</label>
         <select id="ClientID" name="ClientID">
             {% for client in client_list %}
-                <option value={{client.id}} {% if job_info.client.id == client.id %}selected{% endif %}>
-                {{client.name}}
+                <option value={{client.ClientID}} {% if job_info.client.ClientID == client.ClientID %}selected{% endif %}>
+                {{client.Name}}
                 </option>
             {% endfor %}
         </select><br/>
@@ -29,8 +29,8 @@
         <label for="ClientID">Client:</label>
         <select id="ClientID" name="ClientID">
             {% for client in get_all_clients() %}
-                <option value={{client.id}} {% if job_info.client.id == client.id %}selected{% endif %}>
-                {{client.name}}
+                <option value={{client.ClientID}} {% if job_info.client.ClientID == client.ClientID %}selected{% endif %}>
+                {{client.Name}}
                 </option>
             {% endfor %}
         </select><br/>

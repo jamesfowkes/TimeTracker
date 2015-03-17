@@ -6,22 +6,35 @@ from datetime import datetime
 
 from TimeTracker.db import select
 
-class Client:
+from TimeTracker.db import session
+from TimeTracker.base import Base
 
-    def __init__(self, ClientID, name, address):
-        self.id = ClientID
-        self.name = name
-        self.address = address
+from sqlalchemy import Column, Integer, String, func
+
+class Client(Base):
+
+    __tablename__ = "Clients"
+
+    ClientID = Column(String, primary_key=True)
+    Name = Column(String)
+    Address = Column(String)
+    Email = Column(String)
+
+    def __repr__(self):
+        return "<Client(ClientID='%s', Name='%s', Address='%d', Email='%d')>" % (
+            self.ClientID, self.Name, self.Address, self.Email)
+
 
     @classmethod
     def get_all(cls):
-        all_data = select(['ClientID', 'Name', 'Address'], 'Clients', None)
-        return [cls(data['ClientID'], data['Name'], data['Address']) for data in all_data]
+        query = session().query(Client)
+        return query.all()
 
     @classmethod
     def get(cls, ClientID):
-        data = select(['ClientID', 'Name', 'Address'], 'Clients', "ClientID='%s'" % ClientID)[0]
-        return cls(data['ClientID'], data['Name'], data['Address'])
+        query = session().query(Client)
+        query = query.filter(Client.ClientID == ClientID)
+        return query.one()
 
     @classmethod
     def get_for_job(cls, job_name):

@@ -31,8 +31,8 @@ def invoices():
 
     invoices = []
     for client in clients:
-        invoices += MonthlyInvoice.get_all_for_client(client.id)
-        invoices += OneOff.get_all_for_client(client.id)
+        invoices += MonthlyInvoice.get_all_for_client(client.ClientID)
+        invoices += OneOff.get_all_for_client(client.ClientID)
 
     invoices.sort()
 
@@ -50,7 +50,7 @@ def invoices():
 def change_invoice_state():
     ClientID = request.args.get('ClientID', "", type=str)
     timestamp = request.args.get('timestamp', 0, type=int)
-    state = request.args.get('State', "", type=str)
+    state = request.args.get('state', "", type=str)
     num =  request.args.get('num', -1, type=int)
 
     if num != -1:

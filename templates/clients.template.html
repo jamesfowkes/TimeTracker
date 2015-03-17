@@ -18,7 +18,7 @@
 <table>
 	<tr><th>ID</th><th>Name</th><th>Address</th></tr>
 	{% for client in clients %}
-	<tr><td><a href="{{url_for('active_jobs_for_client', ClientID=client.id)}}">{{client.id}}</a></td><td>{{client.name}}</td><td>{{client.address|safe}}</td></tr>
+	<tr><td><a href="{{url_for('active_jobs_for_client', ClientID=client.ClientID)}}">{{client.ClientID}}</a></td><td>{{client.Name}}</td><td>{{client.Address|safe}}</td></tr>
 	{% endfor %}
 </table>
 

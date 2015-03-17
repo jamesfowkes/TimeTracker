@@ -46,10 +46,7 @@ class OneOff(Invoice, Base):
 
         get_module_logger().info("New State = %d", self.State)
 
-        rowcount = update(
-            self.table_name(), ["State"], [self.State],
-            ["ClientID", "Date", "NumericID"], [self.ClientID, self.date().timestamp(), self.NumericID])
-        assert rowcount == 1
+        session().commit()
 
     def get_state(self):
         return self.State
@@ -125,17 +122,6 @@ class OneOff(Invoice, Base):
 
         return query
 
-    #@classmethod
-    #def from_data_dict(cls, data):
-    #    return cls(
-    #        Name=data['Name'],
-    #        ClientID=data['ClientID'],
-    #        Date=data['Date'],
-    #        Charge=data['Charge'],
-    #        Hours=data['Hours'],
-    #        NumericID=data['NumericID'],
-    #        State=data['State'])
-
     @classmethod
     def from_id_date_num(cls, ClientID, day, month, year, num):
 
@@ -167,10 +153,6 @@ class OneOff(Invoice, Base):
     @staticmethod
     def get_sql_name_list():
         return ['Name', 'ClientID', 'Charge', 'Hours', 'Date', "State", "NumericID"]
-
-    @staticmethod
-    def table_name():
-        return "OneOffs"
 
     @staticmethod
     def Create(Name, ClientID, Charge, Hours, Date):
