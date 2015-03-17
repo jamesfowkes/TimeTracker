@@ -1,5 +1,5 @@
 """
-task_job_controller.py
+task_controller.py
 """
 
 import logging
@@ -8,67 +8,21 @@ from time import mktime
 from datetime import datetime
 from calendar import monthrange
 
-from TimeTracker.db import select, update
 from TimeTracker.invoice_controller import Invoice
 from TimeTracker.display_helper import get_sort_key
 
-def month_lookup(month):
-    return datetime.strptime(month, "%b").month
+from TimeTracker.db import session
+from TimeTracker.base import Base
+
+from sqlalchemy import Column, Integer, String, Boolean, func
+
+from TimeTracker.db import select, update
 
 def get_module_logger():
     """ Returns the logger for this module """
     return logging.getLogger(__name__)
 
-class Job:
-
-    def __init__(self, name, ClientID, default_rate, active):
-        self.name = name
-        self.ClientID = ClientID
-        self._default_rate = default_rate
-        self.active = active
-
-    def default_rate(self, fmt="£%.2f"):
-        return fmt % (self._default_rate/100)
-
-    @classmethod
-    def from_data_dict(cls, data):
-        return cls(data['Name'], data['ClientID'], data['DefaultRate'], data['Active'])
-
-    @classmethod
-    def get_all_for_client(cls, ClientID):
-        entries = select(cls.get_sql_name_list(), cls.table_name(), "ClientID='%s'" % ClientID)
-        return [cls.from_data_dict(entry) for entry in entries]
-
-    @classmethod
-    def get_active_for_client(cls, ClientID):
-        entries = select(cls.get_sql_name_list(), cls.table_name(), "ClientID='%s' AND Active=1" % ClientID)
-        return [cls.from_data_dict(entry) for entry in entries]
-
-    @classmethod
-    def get_all_active(cls):
-        entries = select(cls.get_sql_name_list(), cls.table_name(), "Active=1")
-        return [cls.from_data_dict(entry) for entry in entries]
-
-    @classmethod
-    def get_all(cls):
-        entries = select(cls.get_sql_name_list(), cls.table_name(), "")
-        return [cls.from_data_dict(entry) for entry in entries]
-
-    @staticmethod
-    def get_sql_name_list():
-        return ['Name', 'ClientID', 'DefaultRate', 'Active']
-
-    @staticmethod
-    def table_name():
-        return "Jobs"
-
-    @staticmethod
-    def get_default_rate_for_job(job_name):
-        rate = select(['DefaultRate'], "Jobs", "Name='%s'" % job_name)[0]['DefaultRate']
-        return rate/100
-
 class Task:
-
 
     def __init__(self, job, ClientID, desc, rate, start, finish):
         self.job = job

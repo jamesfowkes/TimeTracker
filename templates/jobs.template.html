@@ -29,7 +29,7 @@
 
 {% if job_info.active_only %}
 	{% if job_info.client %}
-		<a href="{{url_for('all_jobs_for_client',ClientID=job_info.client.ClientID)}}">Show all jobs for {{ job_info.client.name }}</a>
+		<a href="{{url_for('all_jobs_for_client',ClientID=job_info.client.ClientID)}}">Show all jobs for {{ job_info.client.Name }}</a>
 	{% else %}
 		<a href="{{url_for('all_jobs')}}">Show all jobs</a>
 	{% endif %}

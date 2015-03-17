@@ -37,7 +37,7 @@ class JobView:
                 title = "All Jobs"
 
             if self.client is not None:
-                    title += " for %s" % self.client.name
+                    title += " for %s" % self.client.Name
 
         return title
 
@@ -115,7 +115,7 @@ def add_new_job():
     try:
         insert("jobs", [job_name, ClientID, rate, True])
     except DBError as err:
-        flash("Job '%s' for %s could not be added (%s)" % (job_name, client.name, err.msg))
+        flash("Job '%s' for %s could not be added (%s)" % (job_name, client.Name, err.msg))
 
     return redirect(url_for('all_jobs_for_client', ClientID=ClientID))
 
@@ -133,14 +133,14 @@ def add_new_oneoff():
         OneOff.Create(oneoff_name, ClientID, charge, hours, workdate)
         #insert("oneoffs", [oneoff_name, ClientID, charge, hours, workdate, 0])
     except DBError as err:
-        flash("Job '%s' for %s could not be added (%s)" % (oneoff_name, client.name, err.msg))
+        flash("Job '%s' for %s could not be added (%s)" % (oneoff_name, client.Name, err.msg))
 
     return redirect(url_for('all_jobs_for_client', ClientID=ClientID))
 
 @app.route("/jobs/<job_name>")
 def job(job_name):
     """ Display a job when the client ID is not known """
-    ClientID = Client.get_for_job(job_name).id
+    ClientID = Client.get_for_job(job_name).ClientID
     return tasks_for_client_job(ClientID, job_name)
 
 @app.route("/jobs/<job_name>/activate")

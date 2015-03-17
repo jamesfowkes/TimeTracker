@@ -2,7 +2,7 @@
     <h1>
     One-off jobs
     {% if job_info.client is not none %}
-        for {{ job_info.client.name }}
+        for {{ job_info.client.Name }}
     {% endif %}
     </h1>
     {% if job_info.oneoffs|length > 0 %}
@@ -33,13 +33,13 @@
             {% for job in job_info.jobs %}
                 <tr>
                     <td>
-                        <a href="{{url_for('job', job_name=job.name)}}">{{job.name}}</a>
+                        <a href="{{url_for('job', job_name=job.Name)}}">{{job.Name}}</a>
                         {% if job.active %}
-                        <a href="{{url_for('deactivate_job', job_name=job.name)}}">
+                        <a href="{{url_for('deactivate_job', job_name=job.Name)}}">
                             <img class="align_bottom" src="{{url_for('static', filename='deactivate.png')}}"
                         </a>
                         {% else %}
-                        <a href="{{url_for('activate_job', job_name=job.name)}}">
+                        <a href="{{url_for('activate_job', job_name=job.Name)}}">
                             <img class="align_bottom" src="{{url_for('static', filename='activate.png')}}"
                         </a>
                         {% endif %}
@@ -71,4 +71,23 @@
         </ol>
         </div>
     {% endif %}
+{% endmacro %}
+
+{% macro render_tasks_table(tasks) -%}
+
+    <table>
+    <tr><th>Job</th><th>Date</th><th>Rate (p.h.)</th><th>Start</th><th>Finish</th><th>Hours</th><th>Subtotal</th></tr>
+    {% for task in tasks_data %}
+    <tr>
+        <td>{{task.job}} - {{task.desc}}</td>
+        <td>{{task.date()}}</td>
+        <td>{{task.rate("£%.2f")}}</td>
+        <td>{{task.start()}}</td>
+        <td>{{task.finish()}}</td>
+        <td>{{task.hours()}}</td>
+        <td class="ra">{{task.total("£%.2f")}}</td>
+    </tr>
+    {% endfor %}
+    </table>
+
 {% endmacro %}
