@@ -8,7 +8,7 @@ from TimeTracker import app
 from TimeTracker.db import select, update, insert
 from TimeTracker.client_controller import Client
 from TimeTracker.invoice_controller import Invoice
-from TimeTracker.task_job_controller import Task
+from TimeTracker.task_controller import Task
 from TimeTracker.oneoff_controller import OneOff
 from TimeTracker.task_views import get_tasks_total
 

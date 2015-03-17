@@ -32,7 +32,7 @@ class Invoice:
         return self.get_possible_states()[self.State]
 
     def get_client_name(self):
-        return Client.get(self.ClientID).name
+        return Client.get(self.ClientID).Name
 
     def __lt__(self, other):
         return self.date() < other.date()

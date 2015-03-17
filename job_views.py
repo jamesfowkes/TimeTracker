@@ -9,7 +9,7 @@ from TimeTracker import app
 from TimeTracker.db import select, insert, update, DBError
 from TimeTracker.client_controller import Client
 from TimeTracker.monthly_invoice_controller import MonthlyInvoice
-from TimeTracker.task_job_controller import Job
+from TimeTracker.job_controller import Job
 from TimeTracker.oneoff_controller import OneOff
 
 from flask import render_template, request, redirect, url_for, flash
@@ -140,19 +140,19 @@ def add_new_oneoff():
 @app.route("/jobs/<job_name>")
 def job(job_name):
     """ Display a job when the client ID is not known """
-    ClientID = Client.get_for_job(job_name).ClientID
+    ClientID = Job.get_client_id(job_name)
     return tasks_for_client_job(ClientID, job_name)
 
 @app.route("/jobs/<job_name>/activate")
 def activate_job(job_name):
     """ Activate a job so it appears in the active list (client ID not known) """
-    ClientID = Client.get_for_job(job_name).id
+    ClientID = Job.get_client_id(job_name)
     update("jobs", ["Active"], [1], ["ClientID", "Name"], [ClientID, job_name])
     return redirect(url_for('all_jobs', ClientID=ClientID))
 
 @app.route("/jobs/<job_name>/deactivate")
 def deactivate_job(job_name):
     """ Deactivate a job so it does not appear in the active list (client ID not known) """
-    ClientID = Client.get_for_job(job_name).id
+    ClientID = Job.get_client_id(job_name)
     update("jobs", ["Active"], [0], ["ClientID", "Name"], [ClientID, job_name])
     return redirect(url_for('active_jobs', ClientID=ClientID))

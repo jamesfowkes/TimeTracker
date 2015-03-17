@@ -24,7 +24,6 @@ class Client(Base):
         return "<Client(ClientID='%s', Name='%s', Address='%d', Email='%d')>" % (
             self.ClientID, self.Name, self.Address, self.Email)
 
-
     @classmethod
     def get_all(cls):
         query = session().query(Client)
@@ -35,11 +34,6 @@ class Client(Base):
         query = session().query(Client)
         query = query.filter(Client.ClientID == ClientID)
         return query.one()
-
-    @classmethod
-    def get_for_job(cls, job_name):
-        job_data = select(['ClientID'], 'Jobs', "Name='%s'" % job_name)[0]
-        return cls.get(job_data['ClientID'])
 
     @staticmethod
     def get_months_when_worked_for_client(ClientID):

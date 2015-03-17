@@ -32,9 +32,11 @@ class Job(Base):
     def default_rate(self, fmt="£%.2f"):
         return fmt % (self.DefaultRate/100)
 
-    @classmethod
-    def from_data_dict(cls, data):
-        return cls(data['Name'], data['ClientID'], data['DefaultRate'], data['Active'])
+    @staticmethod
+    def get_client_id(job_name):
+        query = session().query(Job)
+        query = query.filter(Job.Name == job_name)
+        return query.one().ClientID
 
     @classmethod
     def get_all_for_client(cls, ClientID):
@@ -59,14 +61,6 @@ class Job(Base):
     def get_all(cls):
         query = session().query(Job)
         return query.all()
-
-    @staticmethod
-    def get_sql_name_list():
-        return ['Name', 'ClientID', 'DefaultRate', 'Active']
-
-    @staticmethod
-    def table_name():
-        return "Jobs"
 
     @staticmethod
     def get_default_rate_for_job(job_name):

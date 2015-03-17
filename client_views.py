@@ -10,7 +10,7 @@ import logging
 from TimeTracker import app
 from TimeTracker.db import select, insert, DBError
 from TimeTracker.client_controller import Client
-from TimeTracker.task_job_controller import Task
+from TimeTracker.task_controller import Task
 from TimeTracker.oneoff_controller import OneOff
 
 from flask import render_template, request, redirect, url_for, flash

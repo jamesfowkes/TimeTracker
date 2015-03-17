@@ -7,7 +7,8 @@ from datetime import datetime, timedelta
 from TimeTracker import app
 from TimeTracker.db import select, insert, delete, DBError
 from TimeTracker.client_controller import Client
-from TimeTracker.task_job_controller import Task, Job
+from TimeTracker.task_controller import Task
+from TimeTracker.job_controller import Job
 
 from flask import render_template, request, redirect, url_for, flash
 
