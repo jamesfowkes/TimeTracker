@@ -8,7 +8,6 @@ from time import mktime
 from datetime import datetime
 from calendar import monthrange
 
-from TimeTracker.db import select, update
 from TimeTracker.invoice_controller import Invoice
 from TimeTracker.display_helper import get_sort_key
 
@@ -17,7 +16,7 @@ from TimeTracker.base import Base
 
 from TimeTracker.utility import month_number
 
-from sqlalchemy import Column, Integer, String, func
+from sqlalchemy import Column, Integer, String, ForeignKey
 
 def get_module_logger():
     """ Returns the logger for this module """
@@ -30,7 +29,7 @@ class OneOff(Invoice, Base):
     __tablename__ = "OneOffs"
 
     Name = Column(String)
-    ClientID = Column(String, primary_key=True)
+    ClientID = Column(String, ForeignKey("Clients.ClientID"), primary_key=True)
     Charge = Column(Integer)
     Hours = Column(Integer)
     Date = Column(Integer, primary_key=True)
@@ -149,10 +148,6 @@ class OneOff(Invoice, Base):
     @classmethod
     def get_all(cls):
         return cls.from_query().all()
-
-    @staticmethod
-    def get_sql_name_list():
-        return ['Name', 'ClientID', 'Charge', 'Hours', 'Date', "State", "NumericID"]
 
     @staticmethod
     def Create(Name, ClientID, Charge, Hours, Date):

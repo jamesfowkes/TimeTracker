@@ -8,7 +8,6 @@ from calendar import month_name
 import logging
 
 from TimeTracker import app
-from TimeTracker.db import select, insert, DBError
 from TimeTracker.client_controller import Client
 from TimeTracker.task_controller import Task
 from TimeTracker.oneoff_controller import OneOff
@@ -86,12 +85,14 @@ def add_new_client():
     address = request.form['address']
     email =  request.form['email']
 
-    if valid_ClientID(ClientID):
+    if valid_client_id(ClientID):
         address = format_address_for_display(address)
-        try:
-            insert("clients", [ClientID, name, address, email])
-        except DBError as err:
-            flash("Client '%s' (%s) could not be added (%s)" % (name, ClientID, err.msg))
+        client = Client(
+            ClientID=ClientID,
+            Name=name,
+            Address=address,
+            Email=email)
+        client.insert()
 
     return redirect(url_for('clients'))
 

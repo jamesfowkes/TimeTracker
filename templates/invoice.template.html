@@ -20,7 +20,7 @@
 <tr><th>Job</th><th>Date</th><th>Rate (p.h.)</th><th>Start</th><th>Finish</th><th>Hours</th><th>Subtotal</th></tr>
 {% for task in tasks_data %}
 <tr>
-    <td>{{task.job}} - {{task.desc}}</td>
+    <td>{{task.Job}} - {{task.Description}}</td>
     <td>{{task.date()}}</td>
     <td>{{task.rate("£%.2f")}}</td>
     <td>{{task.start()}}</td>

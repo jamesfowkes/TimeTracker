@@ -14,69 +14,56 @@ from TimeTracker.display_helper import get_sort_key
 from TimeTracker.db import session
 from TimeTracker.base import Base
 
-from sqlalchemy import Column, Integer, String, Boolean, func
-
-from TimeTracker.db import select, update
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
 
 def get_module_logger():
     """ Returns the logger for this module """
     return logging.getLogger(__name__)
 
-class Task:
+class Task(Base):
 
-    def __init__(self, job, ClientID, desc, rate, start, finish):
-        self.job = job
-        self.ClientID = ClientID
-        self.desc = desc
-        self._rate = int(rate)
-        self._start = int(start)
-        self._finish = int(finish)
+    __tablename__ = "Tasks"
+
+    Job = Column(String, ForeignKey("Jobs.Name"), primary_key=True)
+    ClientID = Column(String, ForeignKey("Clients.ClientID"), primary_key=True)
+    Description = Column(String, primary_key=True)
+    Rate = Column(Integer)
+    Start = Column(Integer, primary_key=True)
+    Finish = Column(Integer, primary_key=True)
 
     def table_sort_key(self):
-        return get_sort_key(datetime.fromtimestamp(self._finish))
+        return get_sort_key(datetime.fromtimestamp(self.Finish))
 
     def date(self, fmt="%d-%b-%y"):
-        return datetime.fromtimestamp(self._finish).strftime(fmt)
+        return datetime.fromtimestamp(self.Finish).strftime(fmt)
 
     def rate(self, fmt=None):
-        rate = (self._rate / 100)
+        rate = (self.Rate / 100)
         if fmt:
             rate = fmt % rate
 
         return rate
 
     def total(self, fmt=None):
-        total = self.hours() * (self._rate / 100)
+        total = self.hours() * (self.Rate / 100)
         if fmt:
             total = fmt % total
 
         return total
 
     def start(self, fmt="%H:%M"):
-        return datetime.fromtimestamp(self._start).strftime(fmt)
+        return datetime.fromtimestamp(self.Start).strftime(fmt)
 
     def finish(self, fmt="%H:%M"):
-        return datetime.fromtimestamp(self._finish).strftime(fmt)
+        return datetime.fromtimestamp(self.Finish).strftime(fmt)
 
     def hours(self, fmt = None):
-        hours = (self._finish - self._start) / 3600
+        hours = (self.Finish - self.Start) / 3600
 
         if fmt:
             hours = fmt % hours
 
         return hours
-
-    @staticmethod
-    def get_sql_name_list():
-        return ['Job', 'ClientID', 'Description', 'Rate', 'Start', "Finish"]
-
-    @staticmethod
-    def table_name():
-        return "Tasks"
-
-    @classmethod
-    def from_data_dict(cls, data):
-        return cls(data['Job'], data['ClientID'], data['Description'], data['Rate'], data['Start'], data['Finish'])
 
     @classmethod
     def get_for_client_in_month(cls, ClientID, year, month):
@@ -87,10 +74,53 @@ class Task:
         days_in_month = monthrange(year, month)[1]
         month_end = mktime(datetime(year, month, days_in_month).timetuple())
         month_end += 86399 # Go up to 23:59 on last day of month
-        entries = select(cls.get_sql_name_list(), cls.table_name(), "ClientID='%s' AND Start >= %d AND Start <= %d" % (ClientID, month_start, month_end))
-        return [cls.from_data_dict(entry) for entry in entries]
+
+        query = session().query(Task)
+        query = query.filter(Task.ClientID == ClientID)
+        query = query.filter(Task.Start >= month_start)
+        query = query.filter(Task.Start <= month_end)
+
+        return query.all()
 
     @classmethod
     def get_for_job(cls, job_name):
-        entries = select(cls.get_sql_name_list(), cls.table_name(), "Job='%s' ORDER BY Start ASC" % job_name)
-        return [cls.from_data_dict(entry) for entry in entries]
+
+        query = session().query(Task)
+        query = query.filter(Task.Job == job_name)
+        query = query.order_by(Task.Start.asc())
+
+        return query.all()
+
+    @staticmethod
+    def get_months_when_worked_for_client(ClientID):
+
+        """ Returns a list of datetimes representing the months
+        when at least one piece of work was done for the requested
+        client
+        """
+
+        start_of_current_month = datetime(datetime.now().year, datetime.now().month, 1)
+
+        query = session().query(Task)
+        query = query.filter(Task.ClientID == ClientID)
+        tasks = query.all()
+
+        #data = select(["Start"], "Tasks", "ClientID='%s'" % ClientID)
+        unique_months = set()
+        #for row in data:
+            #this_row_date = datetime.fromtimestamp(row['Start'])
+            #if this_row_date < start_of_current_month: # Only include complete months
+            #    start_of_month_date = datetime(this_row_date.year, this_row_date.month, 1)
+            #    unique_months.add(start_of_month_date)
+
+        for task in tasks:
+            this_task_date = datetime.fromtimestamp(task.Start)
+            if this_task_date < start_of_current_month:  # Only include complete months
+                start_of_month_date = datetime(this_task_date.year, this_task_date.month, 1)
+                unique_months.add(start_of_month_date)
+
+        get_module_logger().info("Got unique months [%s] for client %s",
+            ", ".join([month.strftime("%b") for month in unique_months]),
+            ClientID)
+
+        return unique_months

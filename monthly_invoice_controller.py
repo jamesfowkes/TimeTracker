@@ -3,61 +3,74 @@ monthly_invoice_controller.py
 """
 
 import logging
+from datetime import datetime
 
 from TimeTracker import app
-from TimeTracker.db import select, update, insert
 from TimeTracker.client_controller import Client
 from TimeTracker.invoice_controller import Invoice
 from TimeTracker.task_controller import Task
 from TimeTracker.oneoff_controller import OneOff
 from TimeTracker.task_views import get_tasks_total
 
-from flask import render_template, request, redirect, url_for, flash, jsonify
+from TimeTracker.db import session
+from TimeTracker.base import Base
 
-from datetime import datetime
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
 
 def get_module_logger():
     """ Returns the logger for this module """
     return logging.getLogger(__name__)
 
-class MonthlyInvoice(Invoice):
+class MonthlyInvoice(Invoice, Base):
 
-    def __init__(self, ClientID, month, year):
+    __tablename__ = "MonthlyInvoices"
 
-        self.try_load_from_db(ClientID, month, year)
+    ClientID = Column(String, ForeignKey("Clients.ClientID"), primary_key=True)
+    Month = Column(Integer, primary_key=True)
+    Year = Column(Integer, primary_key=True)
+    State = Column(Integer, primary_key=True, default=0)
 
-    def try_load_from_db(self, ClientID, month, year):
+    @staticmethod
+    def try_load_from_db(ClientID, month, year):
 
-        data = select(self.get_sql_name_list(), self.table_name(), "ClientID='%s' AND Month=%d AND Year=%d" % (ClientID, month, year))
-        if len(data) == 1:
-            self.State = data[0]['State']
-            self.ClientID = data[0]['ClientID']
-            self.month = data[0]['Month']
-            self.year = data[0]['Year']
+        query = session().query(MonthlyInvoice)
+        query = query.filter(MonthlyInvoice.ClientID == ClientID)
+        query = query.filter(MonthlyInvoice.Month == month)
+        query = query.filter(MonthlyInvoice.Year == year)
 
-        elif len(data) == 0:
-            self.create()
-        else:
-            raise Exception("Expected exactly 0 or 1 invoices to be returned")
+        try:
+            return query.one()
+        except:
+            if query.count() > 1:
+                raise Exception("Expected exactly 0 or 1 invoices to be returned")
+            else:
+                # Need to create this invoice
+                invoice = MonthlyInvoice(
+                    ClientID = ClientID,
+                    Month = month,
+                    Year = year)
+
+                session().add(invoice)
+                session().commit()
+
+                return invoice
 
     def date(self):
-        return datetime(day=1, month=self.month, year=self.year)
+        return datetime(day=1, month=self.Month, year=self.Year)
 
     def get_state(self):
         return self.State
 
     def set_state(self, state):
         self.State = self.get_possible_states().index(State)
-        self.State = self.get_possible_states().index(State)
 
         get_module_logger().info("New state = %d", self.State)
 
-        rowcount = update(self.table_name(), ["State"], [self.State], ["ClientID", "Month", "Year"], [self.ClientID, self.month, self.year])
-        assert rowcount == 1
+        session().commit()
 
     def get_total(self):
 
-        tasks_for_client = Task.get_for_client_in_month(self.ClientID, self.year, self.month)
+        tasks_for_client = Task.get_for_client_in_month(self.ClientID, self.Year, self.Month)
         total = get_tasks_total(tasks_for_client)
         return total
 
@@ -73,9 +86,9 @@ class MonthlyInvoice(Invoice):
     def get_all_for_client(cls, ClientID):
         get_module_logger().info("Getting monthly invoices for %s", ClientID)
 
-        unique_months = Client.get_months_when_worked_for_client(ClientID)
+        unique_months = Task.get_months_when_worked_for_client(ClientID)
 
-        invoices = [cls(ClientID, unique_month.month, unique_month.year) for unique_month in unique_months]
+        invoices = [cls.try_load_from_db(ClientID, unique_month.month, unique_month.year) for unique_month in unique_months]
 
         invoices.sort()
 

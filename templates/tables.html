@@ -34,7 +34,7 @@
                 <tr>
                     <td>
                         <a href="{{url_for('job', job_name=job.Name)}}">{{job.Name}}</a>
-                        {% if job.active %}
+                        {% if job.Active %}
                         <a href="{{url_for('deactivate_job', job_name=job.Name)}}">
                             <img class="align_bottom" src="{{url_for('static', filename='deactivate.png')}}"
                         </a>
@@ -79,7 +79,7 @@
     <tr><th>Job</th><th>Date</th><th>Rate (p.h.)</th><th>Start</th><th>Finish</th><th>Hours</th><th>Subtotal</th></tr>
     {% for task in tasks_data %}
     <tr>
-        <td>{{task.job}} - {{task.desc}}</td>
+        <td>{{task.Job}} - {{task.Description}}</td>
         <td>{{task.date()}}</td>
         <td>{{task.rate("£%.2f")}}</td>
         <td>{{task.start()}}</td>

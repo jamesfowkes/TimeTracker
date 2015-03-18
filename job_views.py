@@ -6,7 +6,7 @@ import logging
 
 from datetime import datetime
 from TimeTracker import app
-from TimeTracker.db import select, insert, update, DBError
+from TimeTracker.db import insert, DBError
 from TimeTracker.client_controller import Client
 from TimeTracker.monthly_invoice_controller import MonthlyInvoice
 from TimeTracker.job_controller import Job
@@ -131,7 +131,6 @@ def add_new_oneoff():
 
     try:
         OneOff.Create(oneoff_name, ClientID, charge, hours, workdate)
-        #insert("oneoffs", [oneoff_name, ClientID, charge, hours, workdate, 0])
     except DBError as err:
         flash("Job '%s' for %s could not be added (%s)" % (oneoff_name, client.Name, err.msg))
 
@@ -146,13 +145,11 @@ def job(job_name):
 @app.route("/jobs/<job_name>/activate")
 def activate_job(job_name):
     """ Activate a job so it appears in the active list (client ID not known) """
-    ClientID = Job.get_client_id(job_name)
-    update("jobs", ["Active"], [1], ["ClientID", "Name"], [ClientID, job_name])
-    return redirect(url_for('all_jobs', ClientID=ClientID))
+    Job.from_name(job_name).set_active(True)
+    return redirect(url_for('all_jobs', ClientID=Job.ClientID))
 
 @app.route("/jobs/<job_name>/deactivate")
 def deactivate_job(job_name):
     """ Deactivate a job so it does not appear in the active list (client ID not known) """
-    ClientID = Job.get_client_id(job_name)
-    update("jobs", ["Active"], [0], ["ClientID", "Name"], [ClientID, job_name])
-    return redirect(url_for('active_jobs', ClientID=ClientID))
+    Job.from_name(job_name).set_active(False)
+    return redirect(url_for('active_jobs', ClientID=Job.ClientID))

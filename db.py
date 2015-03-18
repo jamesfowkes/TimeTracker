@@ -27,23 +27,6 @@ _session = None
 def session():
     return _session
 
-def select(cols, frm, where):
-    sql = "SELECT %s FROM %s" % (", ".join(cols), frm)
-    if where:
-        sql += " WHERE %s" % where
-
-    get_module_logger().info("Running %s", sql)
-
-    try:
-        cur = g.db.execute(sql)
-    except sqlite3.OperationalError:
-        get_module_logger().info("Failed with OperationalError")
-        raise DBError('Request unsuccessful - Database returned operational error');
-
-    entries = [dict(zip(cols, row)) for row in cur.fetchall()]
-    get_module_logger().info("Got %d entries", len(entries))
-    return entries
-
 def insert(table, data):
     sql = "INSERT INTO %s VALUES (%s);" % (table, ",".join(["?"] * len(data)))
 
@@ -67,24 +50,6 @@ def delete(table, where_cols, where_data):
         g.db.commit()
     except:
         raise
-
-def update(table, set_cols, set_data, where_cols, where_data):
-    sql = "UPDATE %s SET %s WHERE %s" % (table,
-    ", ".join(["%s=%s" % (col, data) for (col, data) in zip(set_cols, set_data)]),
-    " AND ".join(["%s='%s'" % (col, data) for (col, data) in zip(where_cols, where_data)])
-    )
-
-    get_module_logger().info("Running %s", sql)
-
-    try:
-        _connection = g.db.connect()
-        cursor = g.db.cursor()
-        cursor.execute(sql)
-        g.db.commit()
-    except:
-        raise
-
-    return cursor.rowcount
 
 @app.before_request
 def before_request():

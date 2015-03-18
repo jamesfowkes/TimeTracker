@@ -14,7 +14,7 @@ from TimeTracker.display_helper import get_sort_key
 from TimeTracker.db import session
 from TimeTracker.base import Base
 
-from sqlalchemy import Column, Integer, String, Boolean, func
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
 
 def get_module_logger():
     """ Returns the logger for this module """
@@ -25,9 +25,19 @@ class Job(Base):
     __tablename__ = "Jobs"
 
     Name = Column(String, primary_key=True)
-    ClientID = Column(String, primary_key=True)
+    ClientID = Column(String, ForeignKey("Clients.ClientID"), primary_key=True)
     DefaultRate = Column(Integer)
     Active = Column(Boolean)
+
+    @classmethod
+    def from_name(cls, job_name):
+        query = session().query(Job)
+        query = query.filter(Job.Name == job_name)
+        return query.one()
+
+    def set_active(self, active):
+        self.Active = active
+        session().commit()
 
     def default_rate(self, fmt="£%.2f"):
         return fmt % (self.DefaultRate/100)

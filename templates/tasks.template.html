@@ -37,8 +37,8 @@ Showing tasks for {{ job_name }} for <a href="{{url_for('active_jobs_for_client'
 	{% for task in tasks %}
 	<tr>
 		<td>
-		    {{ task.desc }}
-		    <a href="{{url_for('delete_task', job_name=job_name, ClientID=client.ClientID, description=task.desc, date=task.date(), start=task.start(), finish=task.finish())}}">del</a>
+		    {{ task.Description }}
+		    <a href="{{url_for('delete_task', job_name=job_name, ClientID=client.ClientID, description=task.Description, date=task.date(), start=task.start(), finish=task.finish())}}">del</a>
 		</td>
 		<td>{{ task.rate("£%.2f") }}</td>
 		<td sorttable_customkey={{task.table_sort_key()}}>{{ task.date() }}</td>
