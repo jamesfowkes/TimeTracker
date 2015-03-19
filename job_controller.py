@@ -78,3 +78,7 @@ class Job(Base):
         query = session().query(Job)
         query = query.filter(Job.Name == job_name)
         return query.one().DefaultRate / 100
+
+    def insert(self):
+        session().add(self)
+        session().commit()

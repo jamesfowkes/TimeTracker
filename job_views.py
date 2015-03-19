@@ -6,7 +6,6 @@ import logging
 
 from datetime import datetime
 from TimeTracker import app
-from TimeTracker.db import insert, DBError
 from TimeTracker.client_controller import Client
 from TimeTracker.monthly_invoice_controller import MonthlyInvoice
 from TimeTracker.job_controller import Job
@@ -112,10 +111,8 @@ def add_new_job():
     rate = int(float(request.form['rate']) * 100)
     client = Client.get(ClientID)
 
-    try:
-        insert("jobs", [job_name, ClientID, rate, True])
-    except DBError as err:
-        flash("Job '%s' for %s could not be added (%s)" % (job_name, client.Name, err.msg))
+    job = Job(Name=job_name, ClientID=ClientID, DefaultRate=rate, Active=True)
+    job.insert()
 
     return redirect(url_for('all_jobs_for_client', ClientID=ClientID))
 
@@ -127,12 +124,8 @@ def add_new_oneoff():
     charge = int(float(request.form['charge']) * 100)
     hours = int(float(request.form['hours']) * 100)
     workdate = datetime.strptime(request.form['workdate'], "%Y-%m-%d").timestamp() + (12*60*60) # Make sure date is in middle of day (avoids messy summertime issues)
-    client = Client.get(ClientID)
 
-    try:
-        OneOff.Create(oneoff_name, ClientID, charge, hours, workdate)
-    except DBError as err:
-        flash("Job '%s' for %s could not be added (%s)" % (oneoff_name, client.Name, err.msg))
+    OneOff.Create(oneoff_name, ClientID, charge, hours, workdate)
 
     return redirect(url_for('all_jobs_for_client', ClientID=ClientID))
 

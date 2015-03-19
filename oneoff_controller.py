@@ -150,7 +150,7 @@ class OneOff(Invoice, Base):
         return cls.from_query().all()
 
     @staticmethod
-    def Create(Name, ClientID, Charge, Hours, Date):
+    def insert(Name, ClientID, Charge, Hours, Date):
         all_previous = OneOff.from_query(ClientID=ClientID, Date=Date)
 
         get_module_logger().info("Got %d previous oneoffs for %s on %d", all_previous.count(), ClientID, Date)

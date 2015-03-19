@@ -105,13 +105,7 @@ class Task(Base):
         query = query.filter(Task.ClientID == ClientID)
         tasks = query.all()
 
-        #data = select(["Start"], "Tasks", "ClientID='%s'" % ClientID)
         unique_months = set()
-        #for row in data:
-            #this_row_date = datetime.fromtimestamp(row['Start'])
-            #if this_row_date < start_of_current_month: # Only include complete months
-            #    start_of_month_date = datetime(this_row_date.year, this_row_date.month, 1)
-            #    unique_months.add(start_of_month_date)
 
         for task in tasks:
             this_task_date = datetime.fromtimestamp(task.Start)
@@ -124,3 +118,19 @@ class Task(Base):
             ClientID)
 
         return unique_months
+
+    def insert(self):
+        session().add(self)
+        session().commit()
+
+    @staticmethod
+    def delete(Job, ClientID, Description, Start, Finish):
+
+        query = session().query(Task)
+        query = query.filter(Task.Job == Job)
+        query = query.filter(Task.ClientID == ClientID)
+        query = query.filter(Task.Description == Description)
+        query = query.filter(Task.Start == Start)
+        query = query.filter(Task.Finish == Finish)
+        session().delete(query.one())
+        session().commit()

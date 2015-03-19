@@ -5,7 +5,6 @@ Handles generating views for task-centric data
 
 from datetime import datetime, timedelta
 from TimeTracker import app
-from TimeTracker.db import insert, delete, DBError
 from TimeTracker.client_controller import Client
 from TimeTracker.task_controller import Task
 from TimeTracker.job_controller import Job
@@ -30,10 +29,8 @@ def add_new_task(ClientID, job_name):
     start = workdate + timedelta(0, 0, 0, 0, int(request.form['start'][3:5]), int(request.form['start'][0:2]))
     finish = workdate + timedelta(0, 0, 0, 0, int(request.form['finish'][3:5]), int(request.form['finish'][0:2]))
 
-    try:
-        insert("tasks", [job_name, ClientID, desc, rate, start.timestamp(), finish.timestamp()])
-    except DBError as err:
-        flash("Task '%s' on date '%s' could not be added (%s)" % (desc, request.form['workdate'], err.msg))
+    task = Task(Job=job_name, ClientID=ClientID, Description=desc , Rate=rate, Start=start.timestamp(), Finish=finish.timestamp())
+    task.insert()
 
     return redirect(url_for('tasks_for_client_job', ClientID=ClientID, job_name=job_name))
 
@@ -44,11 +41,7 @@ def delete_task(ClientID, job_name, description, date, start, finish):
     start = workdate + timedelta(0, 0, 0, 0, int(start[3:5]), int(start[0:2]))
     finish = workdate + timedelta(0, 0, 0, 0, int(finish[3:5]), int(finish[0:2]))
 
-    delete(
-        "tasks",
-        ["Job", "ClientID", "Description", "Start", "Finish"],
-        [job_name, ClientID, description, start.timestamp(), finish.timestamp()]
-        )
+    Task.delete(Job=job_name, ClientID=ClientID, Description=description, Start=start.timestamp(), Finish=finish.timestamp())
 
     return redirect(url_for('tasks_for_client_job', ClientID=ClientID, job_name=job_name))
 
@@ -59,4 +52,3 @@ def get_tasks_total(tasks):
 def get_tasks_total_str(tasks, fmt="£%2.2f"):
     """ Sums (hours*rate) for a list of tasks and returns as decimal """
     return fmt % get_tasks_total(tasks)
-
