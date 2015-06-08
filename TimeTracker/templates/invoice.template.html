@@ -1,0 +1,37 @@
+{% extends "view.template.html" %}
+
+{% block nav %}
+        <div id="left_nav" class="inactive_nav">
+            <a href="{{url_for('clients')}}">Clients</a>
+        </div>
+        <div id="mid_nav" class="active_nav">
+            <a href="{{url_for('active_jobs')}}">Jobs</a>
+        </div>
+        <div id="right_nav" class="inactive_nav">
+            <a href="{{url_for('invoices')}}">Invoices</a>
+        </div>
+{% endblock %}
+
+{% block content %}
+<h1>Invoice for {{month}} - {{year}}</h1>
+<h2>Reference: {{client.ClientID}}-{{year}}-{{month}}</h2>
+<p>
+<table class="sortable">
+<tr><th>Job</th><th>Date</th><th>Rate (p.h.)</th><th>Start</th><th>Finish</th><th>Hours</th><th>Subtotal</th></tr>
+{% for task in tasks_data %}
+<tr>
+    <td>{{task.Job}} - {{task.Description}}</td>
+    <td>{{task.date()}}</td>
+    <td>{{task.rate("£%.2f")}}</td>
+    <td>{{task.start()}}</td>
+    <td>{{task.finish()}}</td>
+    <td>{{task.hours()}}</td>
+    <td class="ra">{{task.total("£%.2f")}}</td>
+</tr>
+{% endfor %}
+</table>
+</p>
+<p><span class="strong">Total this invoice: {{total}}</span></p>
+
+{% endblock %}
+

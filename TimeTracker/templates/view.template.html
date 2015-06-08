@@ -1,0 +1,30 @@
+<html>
+<head>
+<title>TimeTracker - {{ page_title }}</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='view.css') }}"/>
+
+<script type=text/javascript>
+$SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+</script>
+
+{% block jscript %}
+{% endblock %}
+
+<script src="{{ url_for('static', filename='sorttable.js') }}"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="{{
+  url_for('static', filename='jquery.js') }}">\x3C/script>')</script>
+
+</head>
+<body>
+	<div id="top_nav_bar">
+		{% block nav %}
+		{% endblock %}
+	</div>
+	<div id="content">
+	{% block content %}
+	{% endblock %}
+	</div>
+</body>
+</html>
