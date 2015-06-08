@@ -67,3 +67,5 @@ signature.jpg
 #jQuery
 jquery.js
 
+# Databases
+*.db
