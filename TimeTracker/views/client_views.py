@@ -8,14 +8,14 @@ from calendar import month_name
 import logging
 
 from TimeTracker import app
-from TimeTracker.client_controller import Client
-from TimeTracker.task_controller import Task
-from TimeTracker.oneoff_controller import OneOff
+from TimeTracker.controllers.client_controller import Client
+from TimeTracker.controllers.task_controller import Task
+from TimeTracker.controllers.oneoff_controller import OneOff
 
 from flask import render_template, request, redirect, url_for, flash
 from flask_weasyprint import HTML, render_pdf
 
-from TimeTracker.task_views import get_tasks_total_str
+from TimeTracker.views.task_views import get_tasks_total_str
 
 def get_module_logger():
     """ Returns the logger for this module """

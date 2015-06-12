@@ -1,8 +1,8 @@
 from datetime import date, datetime, timedelta
 
 from TimeTracker import app
-from TimeTracker.client_controller import Client
-from TimeTracker.invoice_controller import Invoice
+from TimeTracker.controllers.client_controller import Client
+from TimeTracker.controllers.invoice_controller import Invoice
 
 def get_sort_key(dt):
     #YYYYMMDDHHMMSS sort key for dates

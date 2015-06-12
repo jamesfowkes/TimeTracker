@@ -28,17 +28,21 @@
 		margin: 0.5cm;
 	}
 
+	div#payment_details {
+		page-break-before: auto;
+	}
+
 	td, th {
 		padding-left: 0.1cm;
 		padding-right: 0.1cm;
 		border-collapse: collapse;
 		font-size: 11pt;
 	}
-	
+
 	td.ra {
-        text-align:right;	    
+        text-align:right;
 	}
-	
+
 	th {
 		border-bottom: double;
 	}
@@ -56,13 +60,13 @@
 		padding-top: 1cm;
 		padding-bottom: 1cm;
 	}
-	
+
 	p {
 		line-height: 150%;
 	}
-	
+
 	p.indent {
 	    padding-left: 2em;
 	}
-	
+
 }

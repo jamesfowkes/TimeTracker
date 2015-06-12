@@ -69,3 +69,9 @@ jquery.js
 
 # Databases
 *.db
+*.db.bak
+
+# Configuration files
+TimeTracker.cfg
+
+

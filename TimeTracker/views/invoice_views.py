@@ -10,9 +10,9 @@ from collections import namedtuple
 
 from TimeTracker import app
 
-from TimeTracker.client_controller import Client
-from TimeTracker.monthly_invoice_controller import MonthlyInvoice
-from TimeTracker.oneoff_controller import OneOff
+from TimeTracker.controllers.client_controller import Client
+from TimeTracker.controllers.monthly_invoice_controller import MonthlyInvoice
+from TimeTracker.controllers.oneoff_controller import OneOff
 
 from flask import render_template, request, redirect, url_for, flash, jsonify
 from flask_weasyprint import HTML, render_pdf

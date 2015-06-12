@@ -5,7 +5,7 @@ invoice_controller.py
 import logging
 
 from TimeTracker import app
-from TimeTracker.client_controller import Client
+from TimeTracker.controllers.client_controller import Client
 
 from datetime import datetime
 

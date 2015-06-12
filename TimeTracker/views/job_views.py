@@ -6,15 +6,15 @@ import logging
 
 from datetime import datetime
 from TimeTracker import app
-from TimeTracker.client_controller import Client
-from TimeTracker.monthly_invoice_controller import MonthlyInvoice
-from TimeTracker.job_controller import Job
-from TimeTracker.oneoff_controller import OneOff
+from TimeTracker.controllers.client_controller import Client
+from TimeTracker.controllers.monthly_invoice_controller import MonthlyInvoice
+from TimeTracker.controllers.job_controller import Job
+from TimeTracker.controllers.oneoff_controller import OneOff
 from TimeTracker import trellotasks
 
 from flask import render_template, request, redirect, url_for, flash, g
 
-from TimeTracker.task_views import tasks_for_client_job
+from TimeTracker.views.task_views import tasks_for_client_job
 
 def add_trello_task_links_to_g():
     g.tasks_to_add = trellotasks.get_tasks()
@@ -112,7 +112,7 @@ def all_jobs():
     job = JobView(None, jobs, oneoffs, False)
 
     add_trello_task_links_to_g()
-    
+
     return render_template("jobs.template.html", page_title="Jobs", job_info=job)
 
 @app.route("/jobs/add", methods=['POST'])
@@ -158,3 +158,11 @@ def deactivate_job(job_name):
     """ Deactivate a job so it does not appear in the active list (client ID not known) """
     Job.from_name(job_name).set_active(False)
     return redirect(url_for('active_jobs', ClientID=Job.ClientID))
+
+@app.route("/tasks/trello_add_oneoff/<client_id>/<job>/<date>/<hours>/<rate>/")
+def add_oneoff_task_from_trello_data(client_id, job, date, hours, rate):
+    workdate = datetime.strptime(date, "%Y-%m-%d").timestamp()
+
+    OneOff.insert(job, client_id, int(rate)*100, float(hours) * 100, workdate)
+
+    return redirect(url_for('all_jobs_for_client', ClientID=client_id))

@@ -5,21 +5,21 @@ Handles generating views for task-centric data
 
 from datetime import datetime, timedelta
 from TimeTracker import app
-from TimeTracker.client_controller import Client
-from TimeTracker.task_controller import Task
-from TimeTracker.job_controller import Job
+from TimeTracker.controllers.client_controller import Client
+from TimeTracker.controllers.task_controller import Task
+from TimeTracker.controllers.job_controller import Job
 
 from flask import render_template, request, redirect, url_for, flash
 
-@app.route("/tasks/trello_add/<client_id>/<job>/<date>/<start>/<end>/<desc>")
-def add_task_from_trello_data(client_id, job, date, start, end, desc):
+@app.route("/tasks/trello_add_monthly/<client_id>/<job>/<date>/<start>/<end>/<desc>")
+def add_monthly_task_from_trello_data(client_id, job, date, start, end, desc):
     client = Client.get(client_id)
     job = Job.from_name(job)
 
     workdate = datetime.strptime(date, "%Y-%m-%d")
     start = workdate + timedelta(0, 0, 0, 0, int(start[2:4]), int(start[0:2]))
     finish = workdate + timedelta(0, 0, 0, 0, int(end[2:4]), int(end[0:2]))
-    
+
     task = Task(
         Job=job.Name,
         ClientID=client_id,

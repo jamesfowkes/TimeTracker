@@ -8,7 +8,7 @@ from time import mktime
 from datetime import datetime
 from calendar import monthrange
 
-from TimeTracker.invoice_controller import Invoice
+from TimeTracker.controllers.invoice_controller import Invoice
 from TimeTracker.display_helper import get_sort_key
 
 from TimeTracker.db import session

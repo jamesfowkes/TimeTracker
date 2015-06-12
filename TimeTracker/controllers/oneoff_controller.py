@@ -5,10 +5,10 @@ oneoff_controller.py
 import logging
 
 from time import mktime
-from datetime import datetime
+from datetime import datetime, timezone
 from calendar import monthrange
 
-from TimeTracker.invoice_controller import Invoice
+from TimeTracker.controllers.invoice_controller import Invoice
 from TimeTracker.display_helper import get_sort_key
 
 from TimeTracker.db import session
@@ -127,7 +127,7 @@ class OneOff(Invoice, Base):
         year=int(year)
         if year < 100:
             year += 2000
-        date_to_match = datetime(day=int(day), month=month_number(month), year=year, hour=12).timestamp()
+        date_to_match = datetime(day=int(day), month=month_number(month), year=year, hour=12, tzinfo=timezone.utc).timestamp()
 
         oneoff = cls.from_query(Date=date_to_match, NumericID=num, ClientID=ClientID).all()
         assert len(oneoff) == 1
