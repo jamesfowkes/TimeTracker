@@ -79,7 +79,7 @@ def get_times_or_error(time_str):
 		return {
 			'result':False,
 			'error':"Time expected in format HHMM-HHMM",
-			'original':task_str
+			'original':time_str
 		}
 
 	return times
@@ -114,7 +114,7 @@ def generate_oneoff_task_info(task_str):
 	return {'result':True, 'text':text, 'href':url}
 
 def generate_monthly_task_info(client_id, job_name, task_str):
-
+	""" Task info should be in format 'yyyy-mm-dd, hhmm-hhmm, description' """
 	tokens = [tok.strip() for tok in task_str.split(',')]
 
 	error = check_token_length(tokens, 3, task_str)
@@ -123,7 +123,7 @@ def generate_monthly_task_info(client_id, job_name, task_str):
 
 	times = get_times_or_error(tokens[1])
 	if type(times) == dict:
-		return error
+		return times
 
 	params = {
 		'client_id': client_id,
