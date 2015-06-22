@@ -4,7 +4,7 @@ job_views.py
 
 import logging
 
-from datetime import datetime
+from datetime import datetime, timezone
 from TimeTracker import app
 from TimeTracker.controllers.client_controller import Client
 from TimeTracker.controllers.monthly_invoice_controller import MonthlyInvoice
@@ -135,9 +135,10 @@ def add_new_oneoff():
     oneoff_name = request.form['oneoff_name']
     charge = int(float(request.form['charge']) * 100)
     hours = int(float(request.form['hours']) * 100)
-    workdate = datetime.strptime(request.form['workdate'], "%Y-%m-%d").timestamp() + (12*60*60) # Make sure date is in middle of day (avoids messy summertime issues)
+    workdate = datetime.strptime(request.form['workdate'], "%Y-%m-%d")
+    workdate = workdate.replace(tzinfo=timezone.utc).timestamp() + (12*60*60) # Make sure date is in UTC and in middle of day (avoids messy summertime issues)
 
-    OneOff.Create(oneoff_name, ClientID, charge, hours, workdate)
+    OneOff.insert(oneoff_name, ClientID, charge, hours, workdate)
 
     return redirect(url_for('all_jobs_for_client', ClientID=ClientID))
 
