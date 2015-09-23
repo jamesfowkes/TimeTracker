@@ -22,11 +22,12 @@ def add_trello_task_links_to_g():
 class JobView:
 
     """ Container class to pass to template """
-    def __init__(self, client, jobs, oneoffs, active_only):
+    def __init__(self, client, jobs, oneoffs, active_only, client_has_jobs):
         self.client = client
         self.jobs = jobs
         self.oneoffs = oneoffs
         self.active_only = active_only
+        self.client_has_jobs = client_has_jobs
 
     @property
     def title(self):
@@ -61,7 +62,7 @@ def all_jobs_for_client(ClientID):
 
     invoices = MonthlyInvoice.get_all_for_client(ClientID)
 
-    job = JobView(client, jobs, oneoffs, False)
+    job = JobView(client, jobs, oneoffs, False, Job.get_count_for_client(ClientID) > 0)
 
     add_trello_task_links_to_g()
 
@@ -80,7 +81,7 @@ def active_jobs_for_client(ClientID):
 
     invoices = MonthlyInvoice.get_all_for_client(ClientID)
 
-    job = JobView(client, jobs, oneoffs, True)
+    job = JobView(client, jobs, oneoffs, True, Job.get_count_for_client(ClientID) > 0)
 
     add_trello_task_links_to_g()
 
@@ -94,7 +95,7 @@ def active_jobs():
     jobs = Job.get_all_active()
     oneoffs = OneOff.get_all()
 
-    job = JobView(None, jobs, oneoffs, True)
+    job = JobView(None, jobs, oneoffs, True, Job.get_count_for_client(ClientID) > 0)
 
     add_trello_task_links_to_g()
 
@@ -109,7 +110,7 @@ def all_jobs():
 
     oneoffs = OneOff.get_all()
 
-    job = JobView(None, jobs, oneoffs, False)
+    job = JobView(None, jobs, oneoffs, False, Job.get_count_for_client(ClientID) > 0)
 
     add_trello_task_links_to_g()
 
@@ -151,14 +152,16 @@ def job(job_name):
 @app.route("/jobs/<job_name>/activate")
 def activate_job(job_name):
     """ Activate a job so it appears in the active list (client ID not known) """
-    Job.from_name(job_name).set_active(True)
-    return redirect(url_for('all_jobs', ClientID=Job.ClientID))
+    job = Job.from_name(job_name)
+    job.set_active(True)
+    return redirect(url_for('all_jobs_for_client', ClientID=job.ClientID))
 
 @app.route("/jobs/<job_name>/deactivate")
 def deactivate_job(job_name):
     """ Deactivate a job so it does not appear in the active list (client ID not known) """
-    Job.from_name(job_name).set_active(False)
-    return redirect(url_for('active_jobs', ClientID=Job.ClientID))
+    job = Job.from_name(job_name)
+    job.set_active(False)
+    return redirect(url_for('active_jobs_for_client', ClientID=job.ClientID))
 
 @app.route("/tasks/trello_add_oneoff/<client_id>/<job>/<date>/<hours>/<rate>/")
 def add_oneoff_task_from_trello_data(client_id, job, date, hours, rate):

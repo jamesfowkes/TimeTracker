@@ -4,10 +4,9 @@ client_controller.py
 
 from datetime import datetime
 
-from TimeTracker.db import session
-from TimeTracker.base import Base
+from TimeTracker.db import session, Base
 
-from sqlalchemy import Column, Integer, String, func
+from sqlalchemy import Column, Integer, String
 
 class Client(Base):
 

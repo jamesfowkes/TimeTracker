@@ -11,8 +11,7 @@ from calendar import monthrange
 from TimeTracker.controllers.invoice_controller import Invoice
 from TimeTracker.display_helper import get_sort_key
 
-from TimeTracker.db import session
-from TimeTracker.base import Base
+from TimeTracker.db import session, Base
 
 from TimeTracker.utility import month_number
 
@@ -96,7 +95,8 @@ class OneOff(Invoice, Base):
                     day=kwargs['day'],
                     month=kwargs['month'],
                     year=kwargs['year'],
-                    hour=12).timestamp()
+                    hour=12,
+                    tzinfo=timezone.utc).timestamp()
                 query = query.filter(OneOff.Date == date_to_search)
 
             except OverflowError:

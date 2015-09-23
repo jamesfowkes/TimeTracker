@@ -11,45 +11,30 @@ from sqlalchemy.orm import sessionmaker
 import logging
 import sqlite3
 
+from sqlalchemy.ext.declarative import declarative_base
+Base = declarative_base()
+
 def get_module_logger():
     return logging.getLogger(__name__)
 
 get_module_logger().setLevel(logging.INFO)
 
-_engine = None
-_connection = None
 _session = None
 
 def session():
     return _session
 
-def delete(table, where_cols, where_data):
-    sql = "DELETE FROM %s WHERE %s" % (table, " AND ".join(["%s='%s'" % (col, data) for (col, data) in zip(where_cols, where_data)]))
-
-    get_module_logger().info("Running %s", sql)
-
-    try:
-        _connection = g.db.connect()
-        g.db.execute(sql)
-        g.db.commit()
-    except:
-        raise
-
 @app.before_request
 def before_request():
-    g.db = connect_db()
+    connect_db()
 
 @app.teardown_request
 def teardown_request(exception):
-    db = getattr(g, 'db', None)
-    if _connection is not None:
-        _connection.close()
     if _session is not None:
         _session.close()
 
 def connect_db():
     global _session
-    _engine = create_engine('sqlite:///tracker.db')
-    Session = sessionmaker(bind=_engine)
+    engine = create_engine('sqlite:///tracker.db')
+    Session = sessionmaker(bind=engine)
     _session = Session()
-    return _engine

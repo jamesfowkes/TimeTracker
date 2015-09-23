@@ -170,13 +170,13 @@ def check_job_name_exists_or_error(client_id, job_name, err_list, original):
 			return {
 				'result': False,
 				'error': "No job '{}' for client {}".format(job_name, client_id),
-				'original': task_list.name
+				'original': original
 			}
 	except:
 		return {
 			'result': False,
 			'error': "No job '{}'".format(job_name),
-			'original': task_list.name
+			'original': original
 		}
 
 	return True

@@ -11,8 +11,7 @@ from calendar import monthrange
 from TimeTracker.controllers.invoice_controller import Invoice
 from TimeTracker.display_helper import get_sort_key
 
-from TimeTracker.db import session
-from TimeTracker.base import Base
+from TimeTracker.db import session, Base
 
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
 
@@ -54,6 +53,10 @@ class Job(Base):
         query = query.filter(Job.ClientID == ClientID)
         return query.all()
 
+    @classmethod
+    def get_count_for_client(cls, ClientID):
+        return len(cls.get_all_for_client(ClientID))
+        
     @classmethod
     def get_active_for_client(cls, ClientID):
         query = session().query(Job)

@@ -12,8 +12,7 @@ from TimeTracker.controllers.task_controller import Task
 from TimeTracker.controllers.oneoff_controller import OneOff
 from TimeTracker.views.task_views import get_tasks_total
 
-from TimeTracker.db import session
-from TimeTracker.base import Base
+from TimeTracker.db import session, Base
 
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
 

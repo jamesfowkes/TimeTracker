@@ -27,17 +27,19 @@
     {{ render_jobs_table(job_info) }}
 {% endif %}
 
-{% if job_info.active_only %}
-	{% if job_info.client %}
-		<a href="{{url_for('all_jobs_for_client',ClientID=job_info.client.ClientID)}}">Show all jobs for {{ job_info.client.Name }}</a>
+{% if job_info.client_has_jobs %}
+	{% if job_info.active_only %}
+		{% if job_info.client %}
+			<a href="{{url_for('all_jobs_for_client',ClientID=job_info.client.ClientID)}}">Show all jobs for {{ job_info.client.Name }}</a>
+		{% else %}
+			<a href="{{url_for('all_jobs')}}">Show all jobs</a>
+		{% endif %}
 	{% else %}
-		<a href="{{url_for('all_jobs')}}">Show all jobs</a>
-	{% endif %}
-{% else %}
-	{% if job_info.client %}
-		<a href="{{url_for('active_jobs_for_client',ClientID=job_info.client.ClientID)}}">Hide inactive jobs</a>
-	{% else %}
-		<a href="{{url_for('active_jobs')}}">Hide inactive jobs</a>
+		{% if job_info.client %}
+			<a href="{{url_for('active_jobs_for_client',ClientID=job_info.client.ClientID)}}">Hide inactive jobs</a>
+		{% else %}
+			<a href="{{url_for('active_jobs')}}">Hide inactive jobs</a>
+		{% endif %}
 	{% endif %}
 {% endif %}
 
