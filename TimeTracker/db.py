@@ -20,9 +20,15 @@ def get_module_logger():
 get_module_logger().setLevel(logging.INFO)
 
 _session = None
+_engine = None
 
 def session():
     return _session
+
+def create():
+    connect_db()
+    Base.metadata.create_all(bind=_engine)
+    _session.close()
 
 @app.before_request
 def before_request():
@@ -35,6 +41,7 @@ def teardown_request(exception):
 
 def connect_db():
     global _session
-    engine = create_engine('sqlite:///tracker.db')
-    Session = sessionmaker(bind=engine)
+    global _engine
+    _engine = create_engine("sqlite:///" + app.config['DATABASE'])
+    Session = sessionmaker(bind=_engine)
     _session = Session()

@@ -75,6 +75,10 @@ class Job(Base):
         query = session().query(Job)
         return query.all()
 
+    @classmethod
+    def count(cls):
+        return len(cls.get_all())
+        
     @staticmethod
     def get_default_rate_for_job(job_name):
 
