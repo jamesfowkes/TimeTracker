@@ -36,11 +36,12 @@ def invoices():
 
     invoices.sort()
 
-    Totals = namedtuple("Totals", ["Gross", "Tax", "Net"])
+    Totals = namedtuple("Totals", ["Gross", "Tax", "Net","ToTransfer"])
     totals = Totals(
         sum(invoice.get_total() for invoice in invoices),
         sum(invoice.get_tax() for invoice in invoices),
-        sum(invoice.get_total() - invoice.get_tax() for invoice in invoices))
+        sum(invoice.get_total() - invoice.get_tax() for invoice in invoices),
+        sum(invoice.get_tax() for invoice in invoices if invoice.state_string() == "Paid"))
 
     get_module_logger().info("Got %d invoices for rendering", len(invoices))
 
