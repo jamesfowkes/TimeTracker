@@ -95,7 +95,7 @@ def active_jobs():
     jobs = Job.get_all_active()
     oneoffs = OneOff.get_all()
 
-    job = JobView(None, jobs, oneoffs, True, Job.get_count_for_client(ClientID) > 0)
+    job = JobView(None, jobs, oneoffs, True, Job.count() > 0)
 
     add_trello_task_links_to_g()
 
@@ -110,7 +110,7 @@ def all_jobs():
 
     oneoffs = OneOff.get_all()
 
-    job = JobView(None, jobs, oneoffs, False, Job.get_count_for_client(ClientID) > 0)
+    job = JobView(None, jobs, oneoffs, False, Job.count() > 0)
 
     add_trello_task_links_to_g()
 
