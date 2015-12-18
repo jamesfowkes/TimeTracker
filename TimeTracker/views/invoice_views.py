@@ -3,8 +3,8 @@ invoice_views.py
 Handles generating views for invoice data
 """
 
-
 import logging
+import datetime
 
 from collections import namedtuple
 
@@ -23,40 +23,59 @@ def get_module_logger():
 
 get_module_logger().setLevel(logging.INFO)
 
-@app.route("/invoices")
-def invoices():
-    """ Render a table of all invoices """
-
-    clients = Client.get_all()
-
-    invoices = []
-    for client in clients:
-        invoices += MonthlyInvoice.get_all_for_client(client.ClientID)
-        invoices += OneOff.get_all_for_client(client.ClientID)
-
-    invoices.sort()
-
-    Totals = namedtuple("Totals", ["Gross", "Tax", "Net","ToTransfer"])
-    totals = Totals(
+Totals = namedtuple("Totals", ["Gross", "Tax", "Net","ToTransfer"])
+def get_totals_by_type(invoices):
+    return Totals(
         sum(invoice.get_total() for invoice in invoices),
         sum(invoice.get_tax() for invoice in invoices),
         sum(invoice.get_total() - invoice.get_tax() for invoice in invoices),
         sum(invoice.get_tax() for invoice in invoices if invoice.state_string() == "Paid"))
 
+def get_tax_year_start(year):
+    return datetime.datetime(year=year, month=4, day=6)
+
+def get_tax_year_end(year):
+    return datetime.datetime(year=year+1, month=4, day=5)
+
+@app.route("/invoices/<year>")
+def render_invoice_for_year(year):
+    """ Render a table of invoices for one tax year """
+
+    clients = Client.get_all()
+
+    start_date = get_tax_year_start(int(year))
+    end_date = get_tax_year_end(int(year))
+
+    invoices = []
+    for client in clients:
+        invoices += MonthlyInvoice.get_from_client_id_between_dates(client.ClientID, start_date, end_date)
+        invoices += OneOff.get_from_client_id_between_dates(client.ClientID, start_date, end_date)
+
+    invoices.sort()
+
+    totals = get_totals_by_type(invoices)
+
     get_module_logger().info("Got %d invoices for rendering", len(invoices))
 
-    return render_template("invoices.template.html", invoices=invoices, totals = totals)
+    return render_template("invoices.template.html", invoices=invoices, totals = totals, year=year)
+
+@app.route("/invoices")
+def render_default_invoice():
+    return render_invoice_for_year(str(datetime.datetime.now().year))
 
 @app.route("/invoices/change_state")
 def change_invoice_state():
+    
     ClientID = request.args.get('ClientID', "", type=str)
-    timestamp = request.args.get('timestamp', 0, type=int)
-    state = request.args.get('state', "", type=str)
     num =  request.args.get('num', -1, type=int)
+    state = request.args.get('state', "", type=str)
+    
 
     if num != -1:
-        invoice = OneOff.get_from_client_id_date(ClientID, timestamp, num=num)
+        date = request.args.get('date_identifier', "", type=str)
+        invoice = OneOff.get_from_client_id_date_and_num(ClientID, date, num=num)
     else:
+        timestamp = request.args.get('date_identifier', 0, type=int)
         invoice = MonthlyInvoice.get_from_client_id_date(ClientID, timestamp)
 
     result = invoice.set_state(state)

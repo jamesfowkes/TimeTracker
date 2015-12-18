@@ -1,10 +1,10 @@
-function onInvoiceStateChange(_client_id, _timestamp, _num)
+function onInvoiceStateChange(_client_id, _date_identifier, _num)
 {
     $.getJSON(
         $SCRIPT_ROOT + '/invoices/change_state',
         {
             ClientID: _client_id,
-            timestamp: _timestamp,
+            date_identifier: _date_identifier,
             state: $('select#'+_client_id+_timestamp).val(),
             num: _num
         },

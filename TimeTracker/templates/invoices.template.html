@@ -12,14 +12,14 @@
         <a href="{{url_for('active_jobs')}}">Jobs</a>
     </div>
     <div id="right_nav" class="active_nav">
-        <a href="{{url_for('invoices')}}">Invoices</a>
+        <a href="{{url_for('render_default_invoice')}}">Invoices</a>
     </div>
 {% endblock %}
 
 {% block content %}
 
 <h1>
-Invoices
+Invoices - Tax Year {{year}}
 </h1>
 
 
@@ -29,12 +29,12 @@ Invoices
 
 <tr>
     <td>{{invoice.get_client_name()}}</td>
-    <td sorttable_customkey={{get_sort_key(invoice.date())}}>{{invoice.format("%d %b %Y")}}</td>
+    <td sorttable_customkey={{get_sort_key(invoice.datetime())}}>{{invoice.format("%d %b %Y")}}</td>
     <td>{{invoice.get_total_str()}}</td>
     <td>{{invoice.get_tax_str()}}</td>
     <td>
-        <select class="inv_state" id="{{invoice.ClientID}}{{invoice.date().timestamp() | int}}"
-        onchange="onInvoiceStateChange('{{invoice.ClientID}}', {{invoice.date().timestamp() | int}}, {{invoice.num()}})">
+        <select class="inv_state" id="{{invoice.ClientID}}{{invoice.datetime().timestamp() | int}}"
+        onchange="onInvoiceStateChange('{{invoice.ClientID}}', '{{invoice.type()}}', {{invoice.date_identifier()}}, {{invoice.num()}})">
             {% for state in get_invoice_states() %}
                 <option value="{{state}}" {% if state == invoice.state_string() %}selected{% endif %}>
                         {{state}}

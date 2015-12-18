@@ -35,16 +35,16 @@ class Invoice:
         return Client.get(self.ClientID).Name
 
     def __lt__(self, other):
-        return self.date() < other.date()
+        return self.datetime() < other.datetime()
 
     def __gt__(self, other):
-        return self.date() < other.date()
+        return self.datetime() < other.datetime()
 
     def __eq__(self, other):
-        return self.date() == other.date()
+        return self.datetime() == other.datetime()
 
     def format(self, format):
-        return self.date().strftime(format)
+        return self.datetime().strftime(format)
 
     def get_total(self):
         raise NotImplementedError
@@ -58,6 +58,9 @@ class Invoice:
     def get_tax_str(self, fmt="£%.2f"):
         return fmt % self.get_tax()
 
+    def type(self):
+        raise NotImplementedError
+        
     @staticmethod
     def table_name():
         raise NotImplementedError
@@ -71,5 +74,5 @@ class Invoice:
         raise NotImplementedError
 
     @classmethod
-    def get_all_for_client(cls, ClientID):
+    def get_from_client_id_between_dates(cls):
         raise NotImplementedError

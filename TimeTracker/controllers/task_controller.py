@@ -113,7 +113,7 @@ class Task(Base):
                 unique_months.add(start_of_month_date)
 
         get_module_logger().info("Got unique months [%s] for client %s",
-            ", ".join([month.strftime("%b") for month in unique_months]),
+            ", ".join([month.strftime("%Y-%b") for month in unique_months]),
             ClientID)
 
         return unique_months

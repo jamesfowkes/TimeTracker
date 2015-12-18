@@ -72,7 +72,7 @@ def get_invoice_as_pdf(ClientID, year, month):
 def get_oneoff_invoice(ClientID, name, date, month, year, num):
     """ Returns oneoff invoice data rendered as PDF """
     client = Client.get(ClientID)
-    oneoff = OneOff.from_id_date_num(ClientID, date, month, year, num)
+    oneoff = OneOff.get_from_client_id_date_and_num(ClientID, (year, month, date), num)
 
     html = render_template("oneoff.template.html", client=client, oneoff=oneoff)
     return render_pdf(HTML(string=html))

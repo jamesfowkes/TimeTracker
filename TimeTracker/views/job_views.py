@@ -58,9 +58,9 @@ def all_jobs_for_client(ClientID):
 
     jobs = Job.get_all_for_client(ClientID)
 
-    oneoffs = OneOff.get_all_for_client(ClientID)
+    oneoffs = OneOff.get_from_client_id_between_dates(ClientID)
 
-    invoices = MonthlyInvoice.get_all_for_client(ClientID)
+    invoices = MonthlyInvoice.get_from_client_id_between_dates(ClientID)
 
     job = JobView(client, jobs, oneoffs, False, Job.get_count_for_client(ClientID) > 0)
 
@@ -77,9 +77,9 @@ def active_jobs_for_client(ClientID):
 
     jobs = Job.get_active_for_client(ClientID)
 
-    oneoffs = OneOff.get_all_for_client(ClientID)
+    oneoffs = OneOff.get_from_client_id_between_dates(ClientID)
 
-    invoices = MonthlyInvoice.get_all_for_client(ClientID)
+    invoices = MonthlyInvoice.get_from_client_id_between_dates(ClientID)
 
     job = JobView(client, jobs, oneoffs, True, Job.get_count_for_client(ClientID) > 0)
 
@@ -136,9 +136,8 @@ def add_new_oneoff():
     oneoff_name = request.form['oneoff_name']
     charge = int(float(request.form['charge']) * 100)
     hours = int(float(request.form['hours']) * 100)
-    workdate = datetime.strptime(request.form['workdate'], "%Y-%m-%d")
-    workdate = workdate.replace(tzinfo=timezone.utc).timestamp() + (12*60*60) # Make sure date is in UTC and in middle of day (avoids messy summertime issues)
-
+    workdate = request.form['workdate']
+    
     OneOff.insert(oneoff_name, ClientID, charge, hours, workdate)
 
     return redirect(url_for('all_jobs_for_client', ClientID=ClientID))

@@ -15,13 +15,24 @@ from TimeTracker.db import session, Base
 
 from TimeTracker.utility import month_number
 
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, extract
 
 def get_module_logger():
     """ Returns the logger for this module """
     return logging.getLogger(__name__)
 
 get_module_logger().setLevel(logging.INFO)
+
+def tuple_to_date(t):
+    try:
+        (y, m, d) = (int(t[0]), int(t[1]), int(t[2]))
+    except ValueError:
+        (y, m, d) = (int(t[0]), month_number(t[1]), int(t[2]))
+    
+    if y < 100:
+        y += 2000
+    
+    return "{}-{:02d}-{:02d}".format(y, m, d)
 
 class OneOff(Invoice, Base):
 
@@ -31,7 +42,7 @@ class OneOff(Invoice, Base):
     ClientID = Column(String, ForeignKey("Clients.ClientID"), primary_key=True)
     Charge = Column(Integer)
     Hours = Column(Integer)
-    Date = Column(Integer, primary_key=True)
+    Date = Column(String, primary_key=True)
     State = Column(Integer)
     NumericID = Column(Integer, primary_key=True)
 
@@ -52,8 +63,11 @@ class OneOff(Invoice, Base):
     def num(self):
         return self.NumericID
 
+    def datetime(self):
+        return datetime.strptime(self.Date, "%Y-%m-%d")
+
     def date(self):
-        return datetime.fromtimestamp(self.Date)
+        return self.datetime().date()
 
     def reference(self):
         return "%s-%s-%d" % (self.ClientID, self.format_date(), self.NumericID)
@@ -84,31 +98,22 @@ class OneOff(Invoice, Base):
     def get_total_str(self, fmt="£%.2f"):
         return fmt % self.get_total()
 
+    def type(self):
+        "Oneoff Invoice"
+    
+    def date_identifier(self):
+        return self.date()
+
     @classmethod
     def from_query(cls, **kwargs):
-
+        
         query = session().query(OneOff)
 
-        if all(key in kwargs for key in ["day", "month", "year"]):
-            try:
-                date_to_search = datetime(
-                    day=kwargs['day'],
-                    month=kwargs['month'],
-                    year=kwargs['year'],
-                    hour=12,
-                    tzinfo=timezone.utc).timestamp()
-                query = query.filter(OneOff.Date == date_to_search)
+        try:
+            query = query.filter(OneOff.Date == kwargs['Date'])
+        except KeyError:
+            pass
 
-            except OverflowError:
-                get_module_logger().error(
-                    "Could not convert to datetime: %s, %s, %s", str(kwargs['day']), str(kwargs['month']), str(kwargs['year']))
-                raise
-
-        else:
-            try:
-                query = query.filter(OneOff.Date == kwargs['Date'])
-            except KeyError:
-                pass
         try:
             query = query.filter(OneOff.ClientID ==  kwargs['ClientID'])
         except KeyError:
@@ -117,33 +122,50 @@ class OneOff(Invoice, Base):
         try:
             query = query.filter(OneOff.NumericID ==  kwargs['NumericID'])
         except KeyError:
-            pass
+            pass               
 
-        return query
+        return query.order_by(OneOff.Date)
 
     @classmethod
-    def from_id_date_num(cls, ClientID, day, month, year, num):
+    def get_from_client_id_between_dates(cls, ClientID, startdate=None, enddate=None):
+        if type(startdate) == tuple:
+            startdate = tuple_to_date(startdate)
 
-        year=int(year)
-        if year < 100:
-            year += 2000
-        date_to_match = datetime(day=int(day), month=month_number(month), year=year, hour=12, tzinfo=timezone.utc).timestamp()
+        if type(enddate) == tuple:
+            enddate = tuple_to_date(enddate)
+        
+        if enddate and startdate:
+            get_module_logger().info("Querying OneOff for %s from date %s to %s", ClientID, startdate, enddate)
+        
+        elif startdate:
+            get_module_logger().info("Querying OneOff for %s from date %s", ClientID, startdate)
 
-        oneoff = cls.from_query(Date=date_to_match, NumericID=num, ClientID=ClientID).all()
+        elif enddate:
+            get_module_logger().info("Querying OneOff for %s to date %s", ClientID, enddate)
+
+        query = session().query(OneOff)
+
+        query = query.filter(OneOff.ClientID ==  ClientID)
+        
+        if startdate:
+            query = query.filter(OneOff.Date >= startdate)
+        
+        if enddate:
+            query = query.filter(OneOff.Date <= enddate)
+        
+        return query.all()
+
+    @classmethod
+    def get_from_client_id_date_and_num(cls, ClientID, startdate, num, enddate=None):
+
+        if type(startdate) == tuple:
+            startdate = tuple_to_date(startdate)
+
+        get_module_logger().info("Querying OneOff for %s on date %s, number %d", ClientID, startdate, num)
+
+        oneoff = cls.from_query(Date=startdate, NumericID=num, ClientID=ClientID).all()
         assert len(oneoff) == 1
         return oneoff[0]
-
-    @classmethod
-    def get_from_client_id_date(cls, ClientID, timestamp, num):
-
-        date = datetime.fromtimestamp(timestamp)
-        oneoff = cls.from_query(day=date.day, month=date.month, year=date.year, NumericID=num, ClientID=ClientID).all()
-        assert len(oneoff) == 1
-        return oneoff[0]
-
-    @classmethod
-    def get_all_for_client(cls, ClientID):
-        return cls.from_query(ClientID=ClientID).all()
 
     @classmethod
     def get_all(cls):

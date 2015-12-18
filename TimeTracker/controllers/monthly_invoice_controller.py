@@ -30,7 +30,7 @@ class MonthlyInvoice(Invoice, Base):
     State = Column(Integer, primary_key=True, default=0)
 
     @staticmethod
-    def try_load_from_db(ClientID, month, year):
+    def from_query(ClientID, month, year):
 
         query = session().query(MonthlyInvoice)
         query = query.filter(MonthlyInvoice.ClientID == ClientID)
@@ -55,6 +55,9 @@ class MonthlyInvoice(Invoice, Base):
                 return invoice
 
     def date(self):
+        return self.datetime().date()
+        
+    def datetime(self):
         return datetime(day=1, month=self.Month, year=self.Year)
 
     def get_state(self):
@@ -82,12 +85,18 @@ class MonthlyInvoice(Invoice, Base):
         return self.date().strftime(format)
 
     @classmethod
-    def get_all_for_client(cls, ClientID):
+    def get_from_client_id_between_dates(cls, ClientID, startdate=None, enddate=None):
         get_module_logger().info("Getting monthly invoices for %s", ClientID)
 
         unique_months = Task.get_months_when_worked_for_client(ClientID)
 
-        invoices = [cls.try_load_from_db(ClientID, unique_month.month, unique_month.year) for unique_month in unique_months]
+        if startdate is not None:
+            unique_months = [month for month in unique_months if month >= startdate]
+
+        if enddate is not None:
+            unique_months = [month for month in unique_months if month <= enddate]
+
+        invoices = [cls.from_query(ClientID, unique_month.month, unique_month.year) for unique_month in unique_months]
 
         invoices.sort()
 
@@ -96,10 +105,16 @@ class MonthlyInvoice(Invoice, Base):
     @classmethod
     def get_from_client_id_date(cls, ClientID, timestamp):
         date = datetime.fromtimestamp(timestamp)
-        invoice = cls.try_load_from_db(ClientID, date.month, date.year)
+        invoice = cls.from_query(ClientID, date.month, date.year)
         assert invoice is not None
         return invoice
 
+    def date_identifier(self):
+        return self.datetime().timestamp()
+
+    def type(self):
+        "Monthly Invoice"
+    
     @staticmethod
     def num():
         return -1 ## Monthly invoices always return -1 for their ID
