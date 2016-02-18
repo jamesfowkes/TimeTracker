@@ -11,11 +11,9 @@ from calendar import monthrange
 from TimeTracker.controllers.invoice_controller import Invoice
 from TimeTracker.display_helper import get_sort_key
 
-from TimeTracker.db import session, Base
+from TimeTracker.db import db
 
 from TimeTracker.utility import month_number
-
-from sqlalchemy import Column, Integer, String, ForeignKey, extract
 
 def get_module_logger():
     """ Returns the logger for this module """
@@ -34,17 +32,17 @@ def tuple_to_date(t):
     
     return "{}-{:02d}-{:02d}".format(y, m, d)
 
-class OneOff(Invoice, Base):
+class OneOff(Invoice, db.Model):
 
     __tablename__ = "OneOffs"
 
-    Name = Column(String)
-    ClientID = Column(String, ForeignKey("Clients.ClientID"), primary_key=True)
-    Charge = Column(Integer)
-    Hours = Column(Integer)
-    Date = Column(String, primary_key=True)
-    State = Column(Integer)
-    NumericID = Column(Integer, primary_key=True)
+    Name = db.Column(db.String)
+    ClientID = db.Column(db.String, db.ForeignKey("Clients.ClientID"), primary_key=True)
+    Charge = db.Column(db.Integer)
+    Hours = db.Column(db.Integer)
+    Date = db.Column(db.String, primary_key=True)
+    State = db.Column(db.Integer)
+    NumericID = db.Column(db.Integer, primary_key=True)
 
     def __repr__(self):
         return "<OneOff(name='%s', ClientID='%s', charge='%d', hours='%d', date='%d', State='%d', NumericID='%d')>" % (
@@ -55,7 +53,7 @@ class OneOff(Invoice, Base):
 
         get_module_logger().info("New State = %d", self.State)
 
-        session().commit()
+        db.session().commit()
 
     def get_state(self):
         return self.State
@@ -107,7 +105,7 @@ class OneOff(Invoice, Base):
     @classmethod
     def from_query(cls, **kwargs):
         
-        query = session().query(OneOff)
+        query = OneOff.query
 
         try:
             query = query.filter(OneOff.Date == kwargs['Date'])
@@ -143,7 +141,7 @@ class OneOff(Invoice, Base):
         elif enddate:
             get_module_logger().info("Querying OneOff for %s to date %s", ClientID, enddate)
 
-        query = session().query(OneOff)
+        query = OneOff.query
 
         query = query.filter(OneOff.ClientID ==  ClientID)
         
@@ -190,5 +188,5 @@ class OneOff(Invoice, Base):
             NumericID=new_id,
             State=0)
 
-        session().add(new_oneoff)
-        session().commit()
+        db.session().add(new_oneoff)
+        db.session().commit()

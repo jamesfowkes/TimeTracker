@@ -5,7 +5,7 @@ import os
 import TimeTracker
 
 from TimeTracker.controllers.job_controller import Job
-from TimeTracker import db
+from TimeTracker.db import db
 
 class JobControllerTestCase(unittest.TestCase):
 

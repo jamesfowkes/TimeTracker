@@ -11,24 +11,22 @@ from calendar import monthrange
 from TimeTracker.controllers.invoice_controller import Invoice
 from TimeTracker.display_helper import get_sort_key
 
-from TimeTracker.db import session, Base
-
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
+from TimeTracker.db import db
 
 def get_module_logger():
     """ Returns the logger for this module """
     return logging.getLogger(__name__)
 
-class Task(Base):
+class Task(db.Model):
 
     __tablename__ = "Tasks"
 
-    Job = Column(String, ForeignKey("Jobs.Name"), primary_key=True)
-    ClientID = Column(String, ForeignKey("Clients.ClientID"), primary_key=True)
-    Description = Column(String, primary_key=True)
-    Rate = Column(Integer)
-    Start = Column(Integer, primary_key=True)
-    Finish = Column(Integer, primary_key=True)
+    Job = db.Column(db.String, db.ForeignKey("Jobs.Name"), primary_key=True)
+    ClientID = db.Column(db.String, db.ForeignKey("Clients.ClientID"), primary_key=True)
+    Description = db.Column(db.String, primary_key=True)
+    Rate = db.Column(db.Integer)
+    Start = db.Column(db.Integer, primary_key=True)
+    Finish = db.Column(db.Integer, primary_key=True)
 
     def table_sort_key(self):
         return get_sort_key(datetime.fromtimestamp(self.Finish))
@@ -74,7 +72,7 @@ class Task(Base):
         month_end = mktime(datetime(year, month, days_in_month).timetuple())
         month_end += 86399 # Go up to 23:59 on last day of month
 
-        query = session().query(Task)
+        query = Task.query
         query = query.filter(Task.ClientID == ClientID)
         query = query.filter(Task.Start >= month_start)
         query = query.filter(Task.Start <= month_end)
@@ -84,7 +82,7 @@ class Task(Base):
     @classmethod
     def get_for_job(cls, job_name):
 
-        query = session().query(Task)
+        query = Task.query
         query = query.filter(Task.Job == job_name)
         query = query.order_by(Task.Start.asc())
 
@@ -100,7 +98,7 @@ class Task(Base):
 
         start_of_current_month = datetime(datetime.now().year, datetime.now().month, 1)
 
-        query = session().query(Task)
+        query = Task.query
         query = query.filter(Task.ClientID == ClientID)
         tasks = query.all()
 
@@ -119,17 +117,17 @@ class Task(Base):
         return unique_months
 
     def insert(self):
-        session().add(self)
-        session().commit()
+        db.session().add(self)
+        db.session().commit()
 
     @staticmethod
     def delete(Job, ClientID, Description, Start, Finish):
 
-        query = session().query(Task)
+        query = Task.query
         query = query.filter(Task.Job == Job)
         query = query.filter(Task.ClientID == ClientID)
         query = query.filter(Task.Description == Description)
         query = query.filter(Task.Start == Start)
         query = query.filter(Task.Finish == Finish)
-        session().delete(query.one())
-        session().commit()
+        db.session().delete(query.one())
+        db.session().commit()

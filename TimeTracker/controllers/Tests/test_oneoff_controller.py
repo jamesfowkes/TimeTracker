@@ -6,7 +6,7 @@ import datetime
 import TimeTracker
 
 from TimeTracker.controllers.oneoff_controller import OneOff
-from TimeTracker import db
+from TimeTracker.db import db
 
 class OneOffTestCase(unittest.TestCase):
 

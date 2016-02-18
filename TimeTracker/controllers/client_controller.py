@@ -4,18 +4,16 @@ client_controller.py
 
 from datetime import datetime
 
-from TimeTracker.db import session, Base
+from TimeTracker.db import db
 
-from sqlalchemy import Column, Integer, String
-
-class Client(Base):
+class Client(db.Model):
 
     __tablename__ = "Clients"
 
-    ClientID = Column(String, primary_key=True)
-    Name = Column(String)
-    Address = Column(String)
-    Email = Column(String)
+    ClientID = db.Column(db.String, primary_key=True)
+    Name = db.Column(db.String)
+    Address = db.Column(db.String)
+    Email = db.Column(db.String)
 
     def __repr__(self):
         return "<Client(ClientID='%s', Name='%s', Address='%s', Email='%s')>" % (
@@ -23,15 +21,14 @@ class Client(Base):
 
     @classmethod
     def get_all(cls):
-        query = session().query(Client)
+        query = cls.query
         return query.all()
 
     @classmethod
     def get(cls, ClientID):
-        query = session().query(Client)
+        query = cls.query
         query = query.filter(Client.ClientID == ClientID)
         return query.one()
 
     def insert(self):
-        session().add(self)
-        session().commit()
+        db.session().commit()

@@ -31,6 +31,15 @@ def get_totals_by_type(invoices):
         sum(invoice.get_total() - invoice.get_tax() for invoice in invoices),
         sum(invoice.get_tax() for invoice in invoices if invoice.state_string() == "Paid"))
 
+def get_tax_year_for_date(d):
+    if d.month < 4:
+        return d.year - 1
+    if d.month == 4 and d.day <= 5:
+        return d.year - 1
+
+    return d.year
+
+
 def get_tax_year_start(year):
     return datetime.datetime(year=year, month=4, day=6)
 
@@ -57,11 +66,11 @@ def render_invoice_for_year(year):
 
     get_module_logger().info("Got %d invoices for rendering", len(invoices))
 
-    return render_template("invoices.template.html", invoices=invoices, totals = totals, year=year)
+    return render_template("invoices.template.html", invoices=invoices, totals = totals, year={'start':year, 'end':str(int(year)+1)})
 
 @app.route("/invoices")
 def render_default_invoice():
-    return render_invoice_for_year(str(datetime.datetime.now().year))
+    return render_invoice_for_year(str(get_tax_year_for_date(datetime.datetime.now())))
 
 @app.route("/invoices/change_state")
 def change_invoice_state():

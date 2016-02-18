@@ -12,27 +12,25 @@ from TimeTracker.controllers.task_controller import Task
 from TimeTracker.controllers.oneoff_controller import OneOff
 from TimeTracker.views.task_views import get_tasks_total
 
-from TimeTracker.db import session, Base
-
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
+from TimeTracker.db import db
 
 def get_module_logger():
     """ Returns the logger for this module """
     return logging.getLogger(__name__)
 
-class MonthlyInvoice(Invoice, Base):
+class MonthlyInvoice(Invoice, db.Model):
 
     __tablename__ = "MonthlyInvoices"
 
-    ClientID = Column(String, ForeignKey("Clients.ClientID"), primary_key=True)
-    Month = Column(Integer, primary_key=True)
-    Year = Column(Integer, primary_key=True)
-    State = Column(Integer, primary_key=True, default=0)
+    ClientID = db.Column(db.String, db.ForeignKey("Clients.ClientID"), primary_key=True)
+    Month = db.Column(db.Integer, primary_key=True)
+    Year = db.Column(db.Integer, primary_key=True)
+    State = db.Column(db.Integer, primary_key=True, default=0)
 
     @staticmethod
     def from_query(ClientID, month, year):
 
-        query = session().query(MonthlyInvoice)
+        query = MonthlyInvoice.query
         query = query.filter(MonthlyInvoice.ClientID == ClientID)
         query = query.filter(MonthlyInvoice.Month == month)
         query = query.filter(MonthlyInvoice.Year == year)
@@ -49,8 +47,8 @@ class MonthlyInvoice(Invoice, Base):
                     Month = month,
                     Year = year)
 
-                session().add(invoice)
-                session().commit()
+                db.session().add(invoice)
+                db.session().commit()
 
                 return invoice
 
@@ -68,7 +66,7 @@ class MonthlyInvoice(Invoice, Base):
 
         get_module_logger().info("New state = %d", self.State)
 
-        session().commit()
+        db.session().commit()
 
     def get_total(self):
 

@@ -1,47 +1,14 @@
-from TimeTracker import app
-from flask import g
+from flask.ext.sqlalchemy import SQLAlchemy
 
-from datetime import date
-from calendar import monthrange
-from time import mktime
+db = None
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+def add_db(app):
 
-import logging
-import sqlite3
-
-from sqlalchemy.ext.declarative import declarative_base
-Base = declarative_base()
-
-def get_module_logger():
-    return logging.getLogger(__name__)
-
-get_module_logger().setLevel(logging.INFO)
-
-_session = None
-_engine = None
-
-def session():
-    return _session
-
-def create():
-    connect_db()
-    Base.metadata.create_all(bind=_engine)
-    _session.close()
-
-@app.before_request
-def before_request():
-    connect_db()
-
-@app.teardown_request
-def teardown_request(exception):
-    if _session is not None:
-        _session.close()
-
-def connect_db():
-    global _session
-    global _engine
-    _engine = create_engine("sqlite:///" + app.config['DATABASE'])
-    Session = sessionmaker(bind=_engine)
-    _session = Session()
+    global db
+    if "SQLALCHEMY_DATABASE_URI" not in app.config:
+        try:
+            app.config["SQLALCHEMY_DATABASE_URI"] = app.config["DATABASE"] or app.config["DATABASE_URI"]
+        except:
+            raise Exception("Application configuration must specify DATABASE or DATABASE_URI")
+            
+    db = SQLAlchemy(app)
