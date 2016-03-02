@@ -10,14 +10,14 @@ from TimeTracker.controllers.client_controller import Client
 from TimeTracker.controllers.monthly_invoice_controller import MonthlyInvoice
 from TimeTracker.controllers.job_controller import Job
 from TimeTracker.controllers.oneoff_controller import OneOff
-from TimeTracker import trellotasks
+from TimeTracker.controllers import trello
 
 from flask import render_template, request, redirect, url_for, flash, g
 
 from TimeTracker.views.task_views import tasks_for_client_job
 
 def add_trello_task_links_to_g():
-    g.tasks_to_add = trellotasks.get_tasks()
+    g.tasks_to_add = trello.get_tasks(url_for)
 
 class JobView:
 
