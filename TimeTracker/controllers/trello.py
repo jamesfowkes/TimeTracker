@@ -45,6 +45,63 @@ class MonthlyTask:
     def text(self):
         return "'{}' for client {}, job '{}' on {} ({}-{})".format(self.desc, self.client_id, self.job, self.date,self.start, self.end)
 
+    def validate(self):
+
+        # Check that date can be parsed
+        try:
+            task_date = datetime.strptime(self.date, "%Y-%m-%d")
+        except:
+            return "Invalid date '{}'".format(self.date)
+
+        # Check that times can be parsed
+        try:
+            task_start = datetime.strptime(self.start, "%H%M")
+        except:
+            return "Invalid time '{}'".format(self.start)
+        try:
+            task_end = datetime.strptime(self.end, "%H%M")
+        except:
+            return "Invalid time '{}'".format(self.end)
+
+        # Check that start is earlier than finish
+        if task_start > task_end:
+            return "Start time ({}) earlier than end time ({})".format(self.start, self.end)
+
+        if task_start == task_end:
+            return "Start time equal to end time ({})".format(self.start)
+
+        return None
+
+class OneOffTask:
+
+    def __init__(self, client_id, job, date, hours, rate):
+        self.client_id = client_id
+        self.job = job
+        self.date = date
+        self.hours = hours
+        self.rate = rate
+
+    def to_dict(self):
+        return {
+            'client_id': self.client_id,
+            'job': self.job,
+            'date': self.date,
+            'hours': self.hours,
+            'rate': self.rate,
+        }
+
+    def validate(self):
+        try:
+            task_date = datetime.strptime(self.date, "%Y-%m-%d")
+        except:
+            return "Invalid date '{}'".format(self.date)
+
+        return None
+
+    def text(self):
+        return "'{}' for client {} on {} ({} hours at £{:.2f})".format(
+            self.job, self.client_id, self.date, self.hours, float(self.rate))
+
 def get_module_logger():
     """ Returns the logger for this module """
     return logging.getLogger(__name__)
@@ -89,43 +146,6 @@ def get_description_from_tokens(tokens):
         desc = desc or try_parse_for_description(tok)
     return desc
 
-def validate_oneoff_trello_data(data):
-
-    # Check that date can be parsed
-    try:
-        task_date = datetime.strptime(data['date'], "%Y-%m-%d")
-    except:
-        return "Invalid date '{}'".format(data['date'])
-
-    return True
-
-def validate_monthly_trello_data(task):
-
-    # Check that date can be parsed
-    try:
-        task_date = datetime.strptime(task.date, "%Y-%m-%d")
-    except:
-        return "Invalid date '{}'".format(task.date)
-
-    # Check that times can be parsed
-    try:
-        task_start = datetime.strptime(task.start, "%H%M")
-    except:
-        return "Invalid time '{}'".format(task.start)
-    try:
-        task_end = datetime.strptime(task.end, "%H%M")
-    except:
-        return "Invalid time '{}'".format(task.end)
-
-    # Check that start is earlier than finish
-    if task_start > task_end:
-        return "Start time ({}) earlier than end time ({})".format(task.start, task.end)
-
-    if task_start == task_end:
-        return "Start time equal to end time ({})".format(task.start)
-
-    return True
-
 def check_token_length(tokens, expected_tokens, original):
     if len(tokens) != expected_tokens:
         return {
@@ -148,6 +168,15 @@ def parse_monthly_job_string(client_id, job_name, task_str):
     if start and end and task_date and desc:
         return MonthlyTask(client_id, job_name, desc, start, end, task_date)
 
+def parse_oneoff_task_string(task_str):
+    tokens = [tok.strip() for tok in task_str.split(',')]
+
+    error = check_token_length(tokens, 5, task_str)
+    if error is not None:
+        return error
+
+    return OneOffTask(*tokens)
+
 def get_times_or_error(time_str):
     times = time_str.split('-')
 
@@ -160,43 +189,29 @@ def get_times_or_error(time_str):
 
     return times
 
-def generate_oneoff_task_info(task_str):
+def generate_oneoff_task_info(task_str, url_processor):
 
-    get_module_logger().info("Parsing {}", task_str)
+    get_module_logger().info("Parsing '{}' as oneoff task", task_str)
 
-    tokens = [tok.strip() for tok in task_str.split(',')]
+    task = parse_oneoff_task_string(task_str)
 
-    error = check_token_length(tokens, 5, task_str)
-    if error is not None:
-        return error
+    validate_error = task.validate()
 
-    params = {
-        'client_id': tokens[0],
-        'job': tokens[1],
-        'date': tokens[2],
-        'hours': tokens[3],
-        'rate': tokens[4]
-    }
+    if validate_error:
+        return {'result':False, 'error': validate_error, 'original':task_str}
 
-    result = validate_oneoff_trello_data(params)
+    url = url_processor('add_oneoff_task_from_trello_data', **task.to_dict())
 
-    if result != True:
-        return {'result':False, 'error': result, 'original':task_str}
-
-    url = url_for('add_oneoff_task_from_trello_data', **params)
-    text = "'{}' for client {} on {} ({} hours at £{:.2f})".format(
-        params['job'], params['client_id'], params['date'], params['hours'], float(params['rate']))
-
-    return {'result':True, 'text':text, 'href':url}
+    return {'result':True, 'text':task.text(), 'href':url}
 
 def generate_monthly_task_info(client_id, job_name, task_str, url_processor):
 
-    get_module_logger().info("Parsing {}", task_str)
+    get_module_logger().info("Parsing {} for {} in job {}", task_str, client_id, job_name)
     
     task = parse_monthly_job_string(client_id, job_name, task_str)
-    validate_error = validate_monthly_trello_data(task)
+    validate_error = task.validate()
 
-    if validate_error != True:
+    if validate_error:
         return {'result':False, 'error': validate_error, 'original':task_str}
 
     url = url_processor('add_monthly_task_from_trello_data', **task.to_dict())

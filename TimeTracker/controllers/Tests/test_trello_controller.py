@@ -44,6 +44,13 @@ class TrelloControllerTestCase(unittest.TestCase):
         
         self.assertEqual(True, result['result'])
         self.assertEqual("'Test Task' for client ML, job 'Example Job' on 2016-10-09 (0900-1830)", result['text'])
-        
+
+    def test_GenerateOneOffInfo(self):
+
+        result = trello.generate_oneoff_task_info("MR, Test Task, 2016-03-02, 4, 25", lambda v, **kv: None)
+                
+        self.assertEqual(True, result['result'])
+        self.assertEqual("'Test Task' for client MR on 2016-03-02 (4 hours at £25.00)", result['text'])
+
 if __name__ == "__main__":
     unittest.main()
