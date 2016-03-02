@@ -6,7 +6,7 @@
     {% endif %}
     </h1>
     {% if job_info.oneoffs|length > 0 %}
-        <table>
+        <table class="table">
             <tr><th>Name</th><th>Date</th><th>Rate</th><th>Hours</th><th>Total</th></tr>
             {% for oneoff in job_info.oneoffs %}
                 <tr><td>{{oneoff.Name}}</td><td>{{oneoff.format_date()}}</td><td>{{oneoff.charge()}}</td><td>{{oneoff.hours()}}</td>
@@ -27,7 +27,7 @@
 {% endmacro %}
 
 {% macro render_jobs_table(job_info) -%}
-    <table>
+    <table class="table">
         <tr><th>Job Name</th><th>Default Rate</th></tr>
 
             {% for job in job_info.jobs %}
@@ -53,29 +53,29 @@
 {% macro render_invoices_list(invoices) -%}
     {% if invoices|length > 0 %}
         <div id="invoices">
-        <h1>
-        Invoices
-        </h1>
-        <ol>
-        {% for invoice in invoices %}
-            <li>
-                <a href="
-                    {{url_for('get_invoice_as_html', ClientID=job_info.client.ClientID, year=invoice.date().year, month=invoice.date().month)}}">
-                        {{invoice.format("%B %Y")}}
-                </a>
-                <a href="{{url_for('get_invoice_as_pdf', ClientID=job_info.client.ClientID, year=invoice.date().year, month=invoice.format("%m"))}}">
-                    <img class="align_bottom" src="{{url_for('static', filename='pdf.png')}}"/>
-                </a>
-            </li>
-        {% endfor %}
-        </ol>
+            <h1>
+            Invoices
+            </h1>
+            <ol class="list-group">
+            {% for invoice in invoices %}
+                <li class="list-group-item">
+                    <a href="
+                        {{url_for('get_invoice_as_html', ClientID=job_info.client.ClientID, year=invoice.date().year, month=invoice.date().month)}}">
+                            {{invoice.format("%B %Y")}}
+                    </a>
+                    <a href="{{url_for('get_invoice_as_pdf', ClientID=job_info.client.ClientID, year=invoice.date().year, month=invoice.format("%m"))}}">
+                        <img class="align_bottom" src="{{url_for('static', filename='pdf.png')}}"/>
+                    </a>
+                </li>
+            {% endfor %}
+            </ol>
         </div>
     {% endif %}
 {% endmacro %}
 
 {% macro render_tasks_table(tasks) -%}
 
-    <table>
+    <table class="table">
     <tr><th>Job</th><th>Date</th><th>Rate (p.h.)</th><th>Start</th><th>Finish</th><th>Hours</th><th>Subtotal</th></tr>
     {% for task in tasks_data %}
     <tr>
