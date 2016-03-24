@@ -13,7 +13,7 @@
                 <td>{{oneoff.get_total_str()}}
                     <a href="{{url_for(
                     'get_oneoff_invoice',
-                    ClientID=job_info.client.ClientID,
+                    ClientID=oneoff.ClientID,
                     date=oneoff.format_date("%d"),
                     month=oneoff.format_date("%b"),
                     year=oneoff.format_date("%y"),
