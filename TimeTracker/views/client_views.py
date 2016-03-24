@@ -11,6 +11,7 @@ from TimeTracker import app
 from TimeTracker.controllers.client_controller import Client
 from TimeTracker.controllers.task_controller import Task
 from TimeTracker.controllers.oneoff_controller import OneOff
+from TimeTracker.controllers.invoice_controller import get_invoice_data
 
 from flask import render_template, request, redirect, url_for, flash
 from flask_weasyprint import HTML, render_pdf
@@ -64,7 +65,8 @@ def get_invoice_as_pdf(ClientID, year, month):
     month = "%02d" % int(month)
     html = render_template("invoice.template.pdf.html",
         client=client, tasks_data=tasks_data, total=total,
-        year=year, month=month, month_name=month_name[int(month)])
+        year=year, month=month, month_name=month_name[int(month)],
+        invoice_data=get_invoice_data())
 
     return render_pdf(HTML(string=html))
 
@@ -74,7 +76,8 @@ def get_oneoff_invoice(ClientID, name, date, month, year, num):
     client = Client.get(ClientID)
     oneoff = OneOff.get_from_client_id_date_and_num(ClientID, (year, month, date), num)
 
-    html = render_template("oneoff.template.html", client=client, oneoff=oneoff)
+    html = render_template("oneoff.template.pdf.html", client=client, oneoff=oneoff,
+        invoice_data=get_invoice_data())
     return render_pdf(HTML(string=html))
 
 @app.route("/clients/add", methods=['POST'])

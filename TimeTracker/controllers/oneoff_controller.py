@@ -159,7 +159,7 @@ class OneOff(Invoice, db.Model):
         if type(startdate) == tuple:
             startdate = tuple_to_date(startdate)
 
-        get_module_logger().info("Querying OneOff for %s on date %s, number %d", ClientID, startdate, num)
+        get_module_logger().info("Querying OneOff for %s on date %s, number %s", ClientID, startdate, num)
 
         oneoff = cls.from_query(Date=startdate, NumericID=num, ClientID=ClientID).all()
         assert len(oneoff) == 1

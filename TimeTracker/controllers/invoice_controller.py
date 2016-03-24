@@ -3,6 +3,7 @@ invoice_controller.py
 """
 
 import logging
+import yaml
 
 from TimeTracker import app
 from TimeTracker.controllers.client_controller import Client
@@ -76,3 +77,25 @@ class Invoice:
     @classmethod
     def get_from_client_id_between_dates(cls):
         raise NotImplementedError
+
+def parse_invoice_data(data):
+
+    if 'address' in data:
+        data['address'] = data['address'].replace("\n", "<br>")
+
+    if 'payment' in data:
+        data['payment_details'] = "{}<br>Account No: {}<br>Sort Code: {}".format(
+            data['payment']['name'], data['payment']['accno'], data['payment']['sortcode'])
+        
+    return data
+
+def get_invoice_data():
+    if get_invoice_data.data is None:
+        get_invoice_data.data = yaml.load(app.open_instance_resource("invoice-data.yaml", 'r'))
+
+        get_invoice_data.data = parse_invoice_data(get_invoice_data.data)        
+        get_module_logger().info("Loaded invoice data: {}".format(get_invoice_data.data))
+
+    return get_invoice_data.data
+
+get_invoice_data.data = None

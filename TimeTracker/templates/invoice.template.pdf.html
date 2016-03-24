@@ -1,0 +1,43 @@
+{%- from 'tables.html' import render_tasks_table with context %}
+
+<html>
+	<head>
+		<title>{{page_title}}</title>
+		<link rel="stylesheet" href="{{ url_for('static', filename='invoice.css') }}"/>
+	</head>
+
+	<body>
+		<div id="letterhead">
+			<div id="letterhead_img_div">
+				<img id="letterhead_img" src="{{url_for('static', filename='letterhead.svg')}}"/>
+			</div>
+			<div id="my_addr">
+				{{invoice_data['address'] | safe}}
+			</div>
+		</div>
+		<div id="client_addr">
+		{{client.Name}}<br>
+		{{client.Address|safe}}
+		</div>
+		<p>{{ today("%d %B %Y") }}</p>
+		<p>Reference: {{client.ClientID}}-{{year}}-{{month}}</p>
+		<p>Invoice to {{client.Name}} for services rendered in month of {{month_name}} {{year}}</p>
+		<p>
+		{{ render_tasks_table(tasks) }}
+		</p>
+		<p><span class="strong">Total this invoice: {{total}}</span></p>
+
+		<div>
+		<p style="page-break-inside:avoid">
+			Payment details:<br>
+			{{invoice_data['payment_details'] | safe}}
+		</p>
+		<p style="page-break-inside:avoid">
+		Kind regards,<br>
+		<img id="sig" src="{{url_for('static', filename='signature.jpg')}}"/><br>
+		{{invoice_data['name']}}
+		</p>
+		</div>
+	</body>
+</html>
+

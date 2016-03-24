@@ -1,0 +1,41 @@
+<html>
+	<head>
+		<title>{{page_title}}</title>
+		<link rel="stylesheet" href="{{ url_for('static', filename='invoice.css') }}"/>
+	</head>
+
+	<body>
+		<div id="letterhead">
+			<div id="letterhead_img_div">
+				<img id="letterhead_img" src="{{url_for('static', filename='letterhead.svg')}}"/>
+			</div>
+			<div id="my_addr">
+				{{invoice_data['address'] | safe}}
+			</div>
+		</div>
+		<div id="client_addr">
+		{{client.Name}}<br>
+		{{client.Address|safe}}
+		</div>
+		<p>{{ today("%d %B %Y") }}</p>
+		<p>Reference: <span class="strong">{{oneoff.reference()}}</span></p>
+		<p>Job Details:<p>
+		<p class="indent">
+		{{oneoff.Name}} on {{oneoff.format_date()}}<br/>
+		{% if oneoff.hours() != "--" %}
+		{{oneoff.hours()}} hours at {{oneoff.charge()}} per hour
+		{% endif %}
+		</p>
+		<p><span class="strong">Total this invoice: {{oneoff.get_total_str()}}</span></p>
+		<p>
+			Payment details:<br>
+			{{invoice_data['payment_details'] | safe}}
+		</p>
+		<p>
+		Kind regards,<br>
+		<img id="sig" src="{{url_for('static', filename='signature.jpg')}}"/><br>
+		{{invoice_data['name']}}
+		</p>
+	</body>
+</html>
+
