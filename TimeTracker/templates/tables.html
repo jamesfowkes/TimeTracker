@@ -50,7 +50,38 @@
     </table>
 {% endmacro %}
 
-{% macro render_invoices_list(invoices) -%}
+{% macro render_full_invoices_table(invoices) -%}
+<table class="table sortable">
+    <tr><th>Client</th><th>Date</th><th>Amount</th><th>Tax</th><th>Payment State</th><th>PDF</th></tr>
+    {% for invoice in invoices %}
+
+    <tr>
+        <td><a href="{{url_for('all_jobs_for_client', ClientID=invoice.client.ClientID)}}">{{invoice.client.Name}}</a></td>
+        <td sorttable_customkey={{get_sort_key(invoice.datetime())}}>{{invoice.format("%d %b %Y")}}</td>
+        <td>{{invoice.get_total_str()}}</td>
+        <td>{{invoice.get_tax_str()}}</td>
+        <td>
+            <select class="inv_state" id="{{invoice.ClientID}}{{invoice.datetime().timestamp() | int}}"
+            onchange="onInvoiceStateChange('{{invoice.ClientID}}', {{invoice.date_identifier()}}, {{invoice.num()}}, {{invoice.datetime().timestamp() | int}})">
+                {% for state in get_invoice_states() %}
+                    <option value="{{state}}" {% if state == invoice.state_string() %}selected{% endif %}>
+                            {{state}}
+                    </option>
+                {% endfor %}
+            </select>
+        </td>
+        <td>
+            <a href="{{ invoice.get_pdf_url() }}">
+                <img class="align_bottom" src="{{url_for('static', filename='pdf.png')}}"/>
+            </a>
+        </td>
+    </tr>
+
+    {% endfor %}
+</table>
+{% endmacro %}
+
+{% macro render_client_invoices_list(invoices) -%}
     {% if invoices|length > 0 %}
         <div id="invoices">
             <h1>
@@ -60,10 +91,10 @@
             {% for invoice in invoices %}
                 <li class="list-group-item">
                     <a href="
-                        {{url_for('get_invoice_as_html', ClientID=job_info.client.ClientID, year=invoice.date().year, month=invoice.date().month)}}">
+                        {{url_for('get_monthly_invoice_as_html', ClientID=job_info.client.ClientID, year=invoice.date().year, month=invoice.date().month)}}">
                             {{invoice.format("%B %Y")}}
                     </a>
-                    <a href="{{url_for('get_invoice_as_pdf', ClientID=job_info.client.ClientID, year=invoice.date().year, month=invoice.format("%m"))}}">
+                    <a href="{{url_for('get_monthly_invoice_as_pdf', ClientID=job_info.client.ClientID, year=invoice.date().year, month=invoice.format("%m"))}}">
                         <img class="align_bottom" src="{{url_for('static', filename='pdf.png')}}"/>
                     </a>
                 </li>

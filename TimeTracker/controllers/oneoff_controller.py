@@ -4,6 +4,8 @@ oneoff_controller.py
 
 import logging
 
+from flask import url_for
+
 from time import mktime
 from datetime import datetime, timezone
 from calendar import monthrange
@@ -100,7 +102,7 @@ class OneOff(Invoice, db.Model):
         "Oneoff Invoice"
     
     def date_identifier(self):
-        return self.date()
+        return "'" + self.format_date("%Y-%m-%d") + "'"
 
     @classmethod
     def from_query(cls, **kwargs):
@@ -190,3 +192,8 @@ class OneOff(Invoice, db.Model):
 
         db.session().add(new_oneoff)
         db.session().commit()
+
+    def get_pdf_url(self):
+        return url_for('get_oneoff_invoice_as_pdf',
+            ClientID=self.ClientID, name=self.Name,
+            date=self.datetime().day, month=self.datetime().month, year=self.datetime().year, num=self.NumericID)

@@ -1,7 +1,7 @@
 {% extends "view.template.html" %}
 
 {%- from 'forms.html' import render_new_job_form, render_new_oneoff_form with context %}
-{%- from 'tables.html' import render_jobs_table, render_oneoffs_table, render_invoices_list with context %}
+{%- from 'tables.html' import render_jobs_table, render_oneoffs_table, render_client_invoices_list with context %}
 
 {% block navbar %}
 <div class="navbar navbar-fixed-top">
@@ -60,7 +60,7 @@
     	</div>
         <div class="col-md-5">
 			{% if invoices is defined %}
-			    {{ render_invoices_list(invoices) }}
+			    {{ render_client_invoices_list(invoices) }}
 			{% endif %}
 		</div>
 	</div>

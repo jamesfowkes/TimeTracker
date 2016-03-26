@@ -21,7 +21,7 @@ class Invoice:
 
     @staticmethod
     def get_possible_states():
-        return ["Awaiting Payment", "Paid", "Tax Transferred"]
+        return ["Awaiting Payment", "Paid"]
 
     def set_state(self, state):
         raise NotImplementedError
@@ -32,8 +32,9 @@ class Invoice:
     def state_string(self):
         return self.get_possible_states()[self.State]
 
-    def get_client_name(self):
-        return Client.get(self.ClientID).Name
+    @property
+    def client(self):
+        return Client.get(self.ClientID)
 
     def __lt__(self, other):
         return self.datetime() < other.datetime()
@@ -59,6 +60,9 @@ class Invoice:
     def get_tax_str(self, fmt="£%.2f"):
         return fmt % self.get_tax()
 
+    def get_pdf_url(self):
+        raise NotImplementedError
+
     def type(self):
         raise NotImplementedError
         
@@ -78,7 +82,7 @@ class Invoice:
     def get_from_client_id_between_dates(cls):
         raise NotImplementedError
 
-def parse_invoice_data(data):
+def parse_invoice_instance_data(data):
 
     if 'address' in data:
         data['address'] = data['address'].replace("\n", "<br>")
@@ -89,13 +93,13 @@ def parse_invoice_data(data):
         
     return data
 
-def get_invoice_data():
-    if get_invoice_data.data is None:
-        get_invoice_data.data = yaml.load(app.open_instance_resource("invoice-data.yaml", 'r'))
+def get_invoice_instance_data():
+    if get_invoice_instance_data.data is None:
+        get_invoice_instance_data.data = yaml.load(app.open_instance_resource("invoice-data.yaml", 'r'))
 
-        get_invoice_data.data = parse_invoice_data(get_invoice_data.data)        
-        get_module_logger().info("Loaded invoice data: {}".format(get_invoice_data.data))
+        get_invoice_instance_data.data = parse_invoice_instance_data(get_invoice_instance_data.data)        
+        get_module_logger().info("Loaded invoice data: {}".format(get_invoice_instance_data.data))
 
-    return get_invoice_data.data
+    return get_invoice_instance_data.data
 
-get_invoice_data.data = None
+get_invoice_instance_data.data = None

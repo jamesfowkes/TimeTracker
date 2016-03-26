@@ -5,6 +5,8 @@ monthly_invoice_controller.py
 import logging
 from datetime import datetime
 
+from flask import url_for
+
 from TimeTracker import app
 from TimeTracker.controllers.client_controller import Client
 from TimeTracker.controllers.invoice_controller import Invoice
@@ -124,3 +126,6 @@ class MonthlyInvoice(Invoice, db.Model):
     @staticmethod
     def table_name():
         return "MonthlyInvoices"
+
+    def get_pdf_url(self):
+        return url_for('get_monthly_invoice_as_pdf', ClientID=self.ClientID, year=self.Year, month=self.Month)

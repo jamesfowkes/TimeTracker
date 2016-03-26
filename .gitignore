@@ -73,5 +73,5 @@ jquery.js
 
 # Configuration files
 TimeTracker.cfg
-
+instance/*
 

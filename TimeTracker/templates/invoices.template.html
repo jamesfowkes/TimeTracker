@@ -1,7 +1,13 @@
 {% extends "view.template.html" %}
 
-{% block jscript %}
+{%- from 'tables.html' import render_full_invoices_table with context %}
+
+{% block scripts %}
 <script src="{{url_for('static', filename='invoices.js')}}"></script>
+<script type=text/javascript>
+  $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+</script>
+{{super()}}
 {% endblock %}
 
 {% block navbar %}
@@ -34,30 +40,7 @@
     Invoices - Tax Year {{year['start']}}/{{year['end']}}
     </h1>
 
-
-    <table class="table sortable">
-    <tr><th>Client</th><th>Date</th><th>Amount</th><th>Tax</th><th>Payment State</th></tr>
-    {% for invoice in invoices %}
-
-    <tr>
-        <td>{{invoice.get_client_name()}}</td>
-        <td sorttable_customkey={{get_sort_key(invoice.datetime())}}>{{invoice.format("%d %b %Y")}}</td>
-        <td>{{invoice.get_total_str()}}</td>
-        <td>{{invoice.get_tax_str()}}</td>
-        <td>
-            <select class="inv_state" id="{{invoice.ClientID}}{{invoice.datetime().timestamp() | int}}"
-            onchange="onInvoiceStateChange('{{invoice.ClientID}}', '{{invoice.type()}}', {{invoice.date_identifier()}}, {{invoice.num()}})">
-                {% for state in get_invoice_states() %}
-                    <option value="{{state}}" {% if state == invoice.state_string() %}selected{% endif %}>
-                            {{state}}
-                    </option>
-                {% endfor %}
-            </select>
-        </td>
-    </tr>
-
-    {% endfor %}
-    </table>
+    {{ render_full_invoices_table(invoices) }}
 
     <div>
         <h2>Totals</h2>
