@@ -12,7 +12,7 @@
                 <tr><td>{{oneoff.Name}}</td><td>{{oneoff.format_date()}}</td><td>{{oneoff.charge()}}</td><td>{{oneoff.hours()}}</td>
                 <td>{{oneoff.get_total_str()}}
                     <a href="{{url_for(
-                    'get_oneoff_invoice',
+                    'get_oneoff_invoice_as_pdf',
                     ClientID=oneoff.ClientID,
                     date=oneoff.format_date("%d"),
                     month=oneoff.format_date("%b"),
