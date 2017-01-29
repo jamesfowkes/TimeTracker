@@ -12,6 +12,7 @@ from TimeTracker.controllers.client_controller import Client
 from TimeTracker.controllers.task_controller import Task
 from TimeTracker.controllers.oneoff_controller import OneOff
 from TimeTracker.controllers.invoice_controller import get_invoice_instance_data
+from TimeTracker.controllers.address_controller import Address
 
 from flask import render_template, request, redirect, url_for, flash
 from flask_weasyprint import HTML, render_pdf
@@ -49,26 +50,31 @@ def clients():
 @app.route("/clients/add", methods=['POST'])
 def add_new_client():
     """ Adds a new client to the database """
+
     ClientID = request.form['id']
     name = request.form['name']
     address = request.form['address']
     email =  request.form['email']
 
+    get_module_logger().info("Trying to add client %s with ID %s", name, ClientID)
+
     if valid_client_id(ClientID):
-        address = format_address_for_display(address)
+
+
         client = Client(
             ClientID=ClientID,
             Name=name,
-            Address=address,
             Email=email)
         client.insert()
+
+        address = Address.add_for_client(ClientID, address)
+        address.insert()
+
+    else:
+        get_module_logger().warn("Could not add client id %s", ClientID)
 
     return redirect(url_for('clients'))
 
 def valid_client_id(ClientID):
     """ Client IDs are valid if less than 4 chars, alphanumeric and uppercase. """
     return len(ClientID) <= 3 and ClientID.isalpha() and ClientID.isupper()
-
-def format_address_for_display(address):
-    """ Replaces line breaks in client address with HTML breaks """
-    return address.replace("\r\n", "<br>")
