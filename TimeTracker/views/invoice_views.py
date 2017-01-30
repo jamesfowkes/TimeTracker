@@ -28,13 +28,13 @@ def get_module_logger():
 
 get_module_logger().setLevel(logging.INFO)
 
-Totals = namedtuple("Totals", ["Gross", "Tax", "Net","ToTransfer"])
+Totals = namedtuple("Totals", ["Gross", "Tax", "Net"])
 def get_totals_by_type(invoices):
     return Totals(
         sum(invoice.get_total() for invoice in invoices),
         sum(invoice.get_tax() for invoice in invoices),
-        sum(invoice.get_total() - invoice.get_tax() for invoice in invoices),
-        sum(invoice.get_tax() for invoice in invoices if invoice.state_string() == "Paid"))
+        sum(invoice.get_total() - invoice.get_tax() for invoice in invoices)
+    )
 
 def get_tax_year_for_date(d):
     if d.month < 4:
