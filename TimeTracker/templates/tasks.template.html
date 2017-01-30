@@ -1,64 +1,63 @@
 {% extends "view.template.html" %}
 
-{% block nav %}
-		<div id="left_nav" class="inactive_nav">
-			<a href="{{url_for('clients')}}">Clients</a>
-		</div>
-		<div id="mid_nav" class="active_nav">
-			<a href="{{url_for('active_jobs')}}">Jobs</a>
-		</div>
-		<div id="right_nav" class="inactive_nav">
-			<a href="{{url_for('render_default_invoice')}}">Invoices</a>
-		</div>
+{%- from 'tables.html' import render_client_tasks_table with context %}
 
+{% block navbar %}
+<div class="navbar navbar-fixed-top">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="nav">
+                    <a href="{{url_for('clients')}}">Clients</a>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="active nav">
+                    <a href="{{url_for('active_jobs')}}">Jobs</a>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="nav">
+                    <a href="{{url_for('render_default_invoice')}}">Invoices</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block content %}
+<div class="container">
+	{% with messages = get_flashed_messages() %}
+		{% if messages %}
+			<div id="errors">
+			<p>The following errors were raised:</p>
+			{% for message in messages %}
+			<p>
+			{{ message }}
+			</p>
+			{% endfor %}
+			</div>
+		{% endif %}
+	{% endwith %}
 
-{% with messages = get_flashed_messages() %}
-	{% if messages %}
-		<div id="errors">
-		<p>The following errors were raised:</p>
-		{% for message in messages %}
-		<p>
-		{{ message }}
-		</p>
-		{% endfor %}
-		</div>
-	{% endif %}
-{% endwith %}
+	<h2>
+	Showing tasks for {{ job_name }} for <a href="{{url_for('active_jobs_for_client', ClientID=client.ClientID)}}">{{ client.Name }}</a>.
+	</h2>
 
-<p>
-Showing tasks for {{ job_name }} for <a href="{{url_for('active_jobs_for_client', ClientID=client.ClientID)}}">{{ client.Name }}</a>.
-</p>
+	{{ render_client_tasks_table(tasks) }}
 
-<table class="sortable">
-	<tr><th>Description</th><th>Rate</th><th>Date</th><th>Start</th><th>Finish</th><th>Hours</th><th>Total</th></tr>
-	{% for task in tasks %}
-	<tr>
-		<td>
-		    {{ task.Description }}
-		    <a href="{{url_for('delete_task', job_name=job_name, ClientID=client.ClientID, description=task.Description, date=task.date(), start=task.start(), finish=task.finish())}}">del</a>
-		</td>
-		<td>{{ task.rate("£%.2f") }}</td>
-		<td sorttable_customkey={{task.table_sort_key()}}>{{ task.date() }}</td>
-		<td>{{ task.start() }}</td>
-		<td>{{ task.finish() }}</td>
-		<td>{{ task.hours("%.2f") }}</td>
-		<td>{{ task.total("£%.2f") }}</td>
-	</tr>
-	{% endfor %}
-</table>
-<div>
-<p>Add new entry:</p>
-<form action="{{url_for('add_new_task',ClientID=client.ClientID, job_name=job_name)}}" method=post>
-<label for="description">Description:</label><input type="text" id="description" name="description"/><br/>
-<label for="rate">Rate (£):</label><input type="number" id="rate" name="rate" min="0" step="0.01" value="{{default_rate}}"/><br/>
-<label for="workdate">Date:</label><input type="date" id="workdate" name="workdate" value="{{today('%Y-%m-%d')}}"/><br/>
-<label for="start">Start:</label><input type="time" id="start" name="start" value="09:00"/><br/>
-<label for="finish">Finish:</label><input type="time" id="finish" name="finish" value="17:00"/><br/>
-<input type="submit" value="Add"/>
-</form>
+	<div>
+	<h2>Add new entry:</h2>
+	<form action="{{url_for('add_new_task',ClientID=client.ClientID, job_name=job_name)}}" method=post>
+	<label for="description">Description:</label><input type="text" id="description" name="description"/><br/>
+	<label for="rate">Rate (£):</label><input type="number" id="rate" name="rate" min="0" step="0.01" value="{{default_rate}}"/><br/>
+	<label for="workdate">Date:</label><input type="date" id="workdate" name="workdate" value="{{today('%Y-%m-%d')}}"/><br/>
+	<label for="start">Start:</label><input type="time" id="start" name="start" value="09:00"/><br/>
+	<label for="finish">Finish:</label><input type="time" id="finish" name="finish" value="17:00"/><br/>
+	<input type="submit" value="Add"/>
+	</form>
+	</div>
 </div>
 {% endblock %}
 
