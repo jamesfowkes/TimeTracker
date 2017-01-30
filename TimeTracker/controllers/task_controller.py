@@ -13,6 +13,26 @@ from TimeTracker.display_helper import get_sort_key
 
 from TimeTracker.db import db
 
+from collections import namedtuple
+
+class TaskCollection(namedtuple("TaskCollection", ["tasks", "total_hours", "total_amount"])):
+
+    __slots__ = ()
+
+    def total_hours(self, fmt = None):
+        total = self.total_hours
+        if fmt:
+            total = fmt % total
+
+        return total
+
+    def total_amount(self, fmt = None):
+        total = self.total_amount
+        if fmt:
+            total = fmt % total
+
+        return total
+
 def get_module_logger():
     """ Returns the logger for this module """
     return logging.getLogger(__name__)
@@ -79,14 +99,18 @@ class Task(db.Model):
 
         return query.all()
 
-    @classmethod
-    def get_for_job(cls, job_name):
+    @staticmethod
+    def get_for_job(job_name):
 
         query = Task.query
         query = query.filter(Task.Job == job_name)
         query = query.order_by(Task.Start.asc())
 
-        return query.all()
+        tasks = query.all()
+        total_hours = sum([task.hours() for task in tasks])
+        total_amount = sum([task.total() for task in tasks])
+
+        return TaskCollection(tasks, total_hours, total_amount)
 
     @staticmethod
     def get_months_when_worked_for_client(ClientID):
