@@ -175,7 +175,7 @@ class OneOff(Invoice, db.Model):
     def insert(Name, ClientID, Charge, Hours, Date):
         all_previous = OneOff.from_query(ClientID=ClientID, Date=Date)
 
-        get_module_logger().info("Got %d previous oneoffs for %s on %d", all_previous.count(), ClientID, Date)
+        get_module_logger().info("Got %d previous oneoffs for %s on %s", all_previous.count(), ClientID, Date)
         if all_previous.count() > 0:
             new_id = max([oneoff.NumericID for oneoff in all_previous.all()]) + 1
         else:
@@ -191,6 +191,19 @@ class OneOff(Invoice, db.Model):
             State=0)
 
         db.session().add(new_oneoff)
+        db.session().commit()
+
+    @staticmethod
+    def delete(Name, ClientID, Date, NumericID):
+        
+        Date = Date.strftime("%Y-%m-%d")
+        get_module_logger().info("Deleting %s for client %s on %s, ID %d", Name, ClientID, Date, NumericID)
+        query = OneOff.query
+        query = query.filter(OneOff.Name == Name)
+        query = query.filter(OneOff.ClientID == ClientID)
+        query = query.filter(OneOff.Date == Date)
+        query = query.filter(OneOff.NumericID == NumericID)
+        db.session().delete(query.one())
         db.session().commit()
 
     def get_pdf_url(self):
