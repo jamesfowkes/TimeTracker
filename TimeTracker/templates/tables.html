@@ -20,7 +20,11 @@
                     name=oneoff.Name,
                     num=oneoff.NumericID)}}">
                     <img class="align_bottom" src="{{url_for('static', filename='invoice.png')}}"/>
-                    </a></td></tr>
+                    </a>
+                    <a href="{{url_for('delete_oneoff', name=oneoff.Name, client_id=oneoff.ClientID,
+                    date=oneoff.format_date(), numeric_id=oneoff.NumericID)}}">del</a>
+                </td>
+                </tr>
             {% endfor %}
         </table>
     {% endif %}
@@ -121,4 +125,33 @@
     {% endfor %}
     </table>
 
+{% endmacro %}
+
+{% macro render_client_tasks_table(task_data) -%}
+    <table class="table sortable">
+        <tr><th>Description</th><th>Rate</th><th>Date</th><th>Start</th><th>Finish</th><th>Hours</th><th>Total</th></tr>
+        {% for task in task_data.tasks %}
+        <tr>
+            <td>
+                {{ task.Description }}
+                <a href="{{url_for('delete_task', job_name=job_name, ClientID=client.ClientID, description=task.Description, date=task.date(), start=task.start(), finish=task.finish())}}">del</a>
+            </td>
+            <td>{{ task.rate("£%.2f") }}</td>
+            <td sorttable_customkey={{task.table_sort_key()}}>{{ task.date() }}</td>
+            <td>{{ task.start() }}</td>
+            <td>{{ task.finish() }}</td>
+            <td>{{ task.hours("%.2f") }}</td>
+            <td>{{ task.total("£%.2f") }}</td>
+        </tr>
+        {% endfor %}
+        <tr>
+            <td><strong>Totals</strong></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>{{ task_data.total_hours() }}</td>
+            <td>{{ task_data.total_amount("£%.2f") }}</td>
+        </tr>
+    </table>
 {% endmacro %}
