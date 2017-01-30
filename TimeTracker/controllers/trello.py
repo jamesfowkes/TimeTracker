@@ -157,7 +157,7 @@ def check_token_length(tokens, expected_tokens, original):
     return None
 
 def parse_monthly_job_string(client_id, job_name, task_str):
-    get_module_logger().info("Parsing {}", task_str)
+    get_module_logger().info("Parsing {}".format(task_str))
 
     tokens = [tok.strip() for tok in task_str.split(',')]
 
@@ -172,10 +172,12 @@ def parse_oneoff_task_string(task_str):
     tokens = [tok.strip() for tok in task_str.split(',')]
 
     error = check_token_length(tokens, 5, task_str)
-    if error is not None:
-        return error
+    if error is None:
+        task = OneOffTask(*tokens)
+    else:
+        task = None
 
-    return OneOffTask(*tokens)
+    return task, error
 
 def get_times_or_error(time_str):
     times = time_str.split('-')
@@ -191,14 +193,17 @@ def get_times_or_error(time_str):
 
 def generate_oneoff_task_info(task_str, url_processor):
 
-    get_module_logger().info("Parsing '{}' as oneoff task", task_str)
+    get_module_logger().info("Parsing '{}' as oneoff task".format(task_str))
 
-    task = parse_oneoff_task_string(task_str)
+    task, create_error = parse_oneoff_task_string(task_str)
 
-    validate_error = task.validate()
+    if create_error is None:
+        validate_error = task.validate()
 
-    if validate_error:
-        return {'result':False, 'error': validate_error, 'original':task_str}
+        if validate_error:
+            return {'result':False, 'error': validate_error, 'original':task_str}
+    else:
+        return {'result':False, 'error': create_error, 'original':task_str}
 
     url = url_processor('add_oneoff_task_from_trello_data', **task.to_dict())
 
@@ -206,7 +211,7 @@ def generate_oneoff_task_info(task_str, url_processor):
 
 def generate_monthly_task_info(client_id, job_name, task_str, url_processor):
 
-    get_module_logger().info("Parsing {} for {} in job {}", task_str, client_id, job_name)
+    get_module_logger().info("Parsing {} for {} in job {}".format(task_str, client_id, job_name))
     
     task = parse_monthly_job_string(client_id, job_name, task_str)
     validate_error = task.validate()
@@ -264,7 +269,7 @@ def get_tasks(url_processor):
         if task_list.name == "Oneoffs":
             # Treat cards in this list as one off jobs with 5 tokens to parse
             for task in task_list.get_cards():
-                task_dict = generate_oneoff_task_info(task.get_card_information()['name'])
+                task_dict = generate_oneoff_task_info(task.get_card_information()['name'], url_processor)
                 tasks.append( task_dict )
         else:
             # Treat cards in this list as monthly jobs with 3 tokens to parse
