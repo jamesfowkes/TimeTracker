@@ -26,6 +26,9 @@ class Job(db.Model):
     DefaultRate = db.Column(db.Integer)
     Active = db.Column(db.Boolean)
 
+    def __str__(self):
+        return "{} for client {} at {} p.h. ({})".format(self.Name, self.ClientID, self.DefaultRate, "Active" if self.Active else "Inactive")
+
     @classmethod
     def from_name(cls, job_name):
         query = cls.query
@@ -85,4 +88,5 @@ class Job(db.Model):
         return query.one().DefaultRate / 100
 
     def insert(self):
+        db.session().add(self)
         db.session().commit()
