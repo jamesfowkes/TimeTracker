@@ -75,20 +75,22 @@
 	</div>
 
 	{% if g.tasks_to_add is defined %}
-	<div id="trellotasks">
-	<h1>
-	    Add tasks from Trello 
-	</h1>
-	<ul>
-	{% for task in g.tasks_to_add %}
-		{% if task.result == True %}
-		<li><a href="{{task.href}}">{{task.text}}</a></li>
-		{% else %}
-		<li>Parse of <strong>'{{task.original}}'</strong> failed ({{task.error}})</li>
+		{% if g.tasks_to_add | length > 0 %}
+			<div id="trellotasks">
+			<h1>
+			    Add tasks from Trello 
+			</h1>
+			<ul>	
+			{% for task in g.tasks_to_add %}
+				{% if task.result == True %}
+				<li><a href="{{task.href}}">{{task.text}}</a></li>
+				{% else %}
+				<li>Parse of <strong>'{{task.original}}'</strong> failed ({{task.error}})</li>
+				{% endif %}
+			{% endfor %}
+			</ul>
+			</div>
 		{% endif %}
-	{% endfor %}
-	</ul>
-	</div>
 	{% endif %}
 </div>
 {% endblock %}
