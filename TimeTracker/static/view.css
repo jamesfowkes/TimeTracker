@@ -16,3 +16,7 @@ div.navbar div.active {
 div.navbar {
         padding-top: 30px;
 }
+
+.inline {
+	display: inline-block;
+}
