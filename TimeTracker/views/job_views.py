@@ -122,9 +122,11 @@ def add_new_job():
     ClientID = request.form['ClientID']
     job_name = request.form['job_name']
     rate = int(float(request.form['rate']) * 100)
-    client = Client.get(ClientID)
 
     job = Job(Name=job_name, ClientID=ClientID, DefaultRate=rate, Active=True)
+
+    get_module_logger().info("Created job %s", job)
+
     job.insert()
 
     return redirect(url_for('all_jobs_for_client', ClientID=ClientID))
@@ -141,6 +143,15 @@ def add_new_oneoff():
     OneOff.insert(oneoff_name, ClientID, charge, hours, workdate)
 
     return redirect(url_for('all_jobs_for_client', ClientID=ClientID))
+
+@app.route("/jobs/delete/oneoff/<name>/<client_id>/<date>/<numeric_id>")
+def delete_oneoff(name, client_id, date, numeric_id):
+    """ Deletes a oneoff job from the database """
+    date = datetime.strptime(date, "%d-%b-%y")
+    numeric_id = int(numeric_id)
+    OneOff.delete(name, client_id, date, numeric_id)
+
+    return redirect(url_for('all_jobs_for_client', ClientID=client_id))
 
 @app.route("/jobs/<job_name>")
 def job(job_name):
