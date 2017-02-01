@@ -7,9 +7,9 @@
     </h1>
     {% if job_info.oneoffs|length > 0 %}
         <table class="table">
-            <tr><th>Name</th><th>Date</th><th>Rate</th><th>Hours</th><th>Total</th></tr>
+            <tr><th>Name</th><th>Date</th><th>Rate</th><th>Time</th><th>Total</th></tr>
             {% for oneoff in job_info.oneoffs %}
-                <tr><td>{{oneoff.Name}}</td><td>{{oneoff.format_date()}}</td><td>{{oneoff.charge()}}</td><td>{{oneoff.hours()}}</td>
+                <tr><td>{{oneoff.Name}}</td><td>{{oneoff.format_date()}}</td><td>{{oneoff.charge()}}</td><td>{{oneoff.time()}}</td>
                 <td>{{oneoff.get_total_str()}}
                     <a href="{{url_for(
                     'get_oneoff_invoice_as_pdf',

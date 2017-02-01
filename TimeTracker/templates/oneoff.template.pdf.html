@@ -22,8 +22,8 @@
 		<p>Job Details:<p>
 		<p class="indent">
 		{{oneoff.Name}} on {{oneoff.format_date()}}<br/>
-		{% if oneoff.hours() != "--" %}
-		{{oneoff.hours()}} hours at {{oneoff.charge()}} per hour
+		{% if oneoff.charge() != "--" %}
+		{{oneoff.time()}} {{oneoff.period_long()}} at {{oneoff.charge()}}
 		{% endif %}
 		</p>
 		<p><span class="strong">Total this invoice: {{oneoff.get_total_str()}}</span></p>

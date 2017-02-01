@@ -15,19 +15,19 @@ from TimeTracker.db import db
 
 from collections import namedtuple
 
-class TaskCollection(namedtuple("TaskCollection", ["tasks", "total_hours", "total_amount"])):
+class TaskCollection(namedtuple("TaskCollection", ["tasks", "total_hours_", "total_amount_"])):
 
     __slots__ = ()
 
     def total_hours(self, fmt = None):
-        total = self.total_hours
+        total = self.total_hours_
         if fmt:
             total = fmt % total
 
         return total
 
     def total_amount(self, fmt = None):
-        total = self.total_amount
+        total = self.total_amount_
         if fmt:
             total = fmt % total
 

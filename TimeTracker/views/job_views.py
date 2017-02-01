@@ -137,10 +137,11 @@ def add_new_oneoff():
     ClientID = request.form['ClientID']
     oneoff_name = request.form['oneoff_name']
     charge = int(float(request.form['charge']) * 100)
-    hours = int(float(request.form['hours']) * 100)
+    period = request.form['period']
+    time = int(float(request.form['time']) * 100)
     workdate = request.form['workdate']
     
-    OneOff.insert(oneoff_name, ClientID, charge, hours, workdate)
+    OneOff.insert(oneoff_name, ClientID, charge, time, period, workdate)
 
     return redirect(url_for('all_jobs_for_client', ClientID=ClientID))
 

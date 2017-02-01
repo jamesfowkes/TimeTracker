@@ -41,14 +41,15 @@ class OneOff(Invoice, db.Model):
     Name = db.Column(db.String)
     ClientID = db.Column(db.String, db.ForeignKey("Clients.ClientID"), primary_key=True)
     Charge = db.Column(db.Integer)
-    Hours = db.Column(db.Integer)
+    Time = db.Column(db.Integer)
+    Period = db.Column(db.String)
     Date = db.Column(db.String, primary_key=True)
     State = db.Column(db.Integer)
     NumericID = db.Column(db.Integer, primary_key=True)
 
     def __repr__(self):
-        return "<OneOff(name='%s', ClientID='%s', charge='%d', hours='%d', date='%d', State='%d', NumericID='%d')>" % (
-            self.Name, self.ClientID, self.Charge, self.Hours, self.Date, self.State, self.NumericID)
+        return "<OneOff(name='%s', ClientID='%s', charge='%d', time='%d', date='%d', State='%d', NumericID='%d')>" % (
+            self.Name, self.ClientID, self.Charge, self.Time, self.Date, self.State, self.NumericID)
 
     def set_state(self, State):
         self.State = self.get_possible_states().index(State)
@@ -75,21 +76,30 @@ class OneOff(Invoice, db.Model):
     def format_date(self, fmt="%d-%b-%y"):
         return self.date().strftime(fmt)
 
-    def charge(self, fmt="£%.2f"):
-        if self.Hours > 0:
-            return fmt % (self.Charge / 100)
+    def period_short(self):
+        return self.Period.lower()
+
+    def period_long(self):
+        if self.Period == 'H':
+            return "hours"
+        if self.Period == 'D':
+            return "days"
+        
+    def charge(self, fmt="£{charge:.2f} p.{period}."):
+        if self.Time > 0:
+            return fmt.format(charge=self.Charge / 100, period=self.period_short())
         else:
             return "--"
 
-    def hours(self):
-        if self.Hours > 0:
-            return "%.2f" % (self.Hours/100)
+    def time(self):
+        if self.Time > 0:
+            return "%.2f" % (self.Time/100)
         else:
             return "--"
 
     def get_total(self):
-        if self.Hours > 0:
-            total = (self.Charge / 100) * (self.Hours / 100)
+        if self.Time > 0:
+            total = (self.Charge / 100) * (self.Time / 100)
         else:
             total = (self.Charge / 100)
 
@@ -172,7 +182,7 @@ class OneOff(Invoice, db.Model):
         return cls.from_query().all()
 
     @staticmethod
-    def insert(Name, ClientID, Charge, Hours, Date):
+    def insert(Name, ClientID, Charge, Time, Period,  Date):
         all_previous = OneOff.from_query(ClientID=ClientID, Date=Date)
 
         get_module_logger().info("Got %d previous oneoffs for %s on %s", all_previous.count(), ClientID, Date)
@@ -185,7 +195,8 @@ class OneOff(Invoice, db.Model):
             Name=Name,
             ClientID=ClientID,
             Charge=Charge,
-            Hours=Hours,
+            Time=Time,
+            Period=Period,
             Date=Date,
             NumericID=new_id,
             State=0)

@@ -27,7 +27,7 @@ class Job(db.Model):
     Active = db.Column(db.Boolean)
 
     def __str__(self):
-        return "{} for client {} at {} p.h. ({})".format(self.Name, self.ClientID, self.DefaultRate, "Active" if self.Active else "Inactive")
+        return "{} for client {} at {} p.{}. ({})".format(self.Name, self.ClientID, self.DefaultRate, "Active" if self.Active else "Inactive")
 
     @classmethod
     def from_name(cls, job_name):
